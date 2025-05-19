@@ -12,13 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('movements', function (Blueprint $table) {
-            $table->id();
-            $table->date('date');
-            $table->foreignId('item_id')->constrained()->onDelete('cascade');
-            $table->foreignId('from_warehouse_id')->constrained('warehouses')->onDelete('cascade');
-            $table->foreignId('to_warehouse_id')->constrained('warehouses')->onDelete('cascade');
-            $table->integer('quantity');
-            $table->timestamps();
+           $table->id();
+    $table->date('date');
+    $table->foreignId('from_warehouse_id')->constrained('warehouses')->onDelete('cascade');
+    $table->foreignId('to_warehouse_id')->constrained('warehouses')->onDelete('cascade');
+    $table->integer('total_quantity')->default(0); // Add this line
+    $table->timestamps();
         });
         
     }

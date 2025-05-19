@@ -52,4 +52,15 @@ class ItemController extends Controller
     return back();
 }
 
+public function getByBarcode($barcode)
+{
+    $item = Item::with('category','unit')->where('barcode', $barcode)->first();
+
+    if ($item) {
+        return response()->json($item);
+    }
+
+    return response()->json(['error' => 'Item not found'], 404);
+}
+
 }

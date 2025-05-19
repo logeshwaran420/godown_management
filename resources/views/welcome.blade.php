@@ -3,10 +3,8 @@
 
 @section('content')
 
-<x-layout.topbar/>
-            <!-- Dashboard Content -->
-            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Sales Activity -->
+            <x-layout.topbar/>
+                <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-white p-4 rounded shadow col-span-2">
                     <h2 class="text-lg font-semibold mb-4">Sales Activity</h2>
                     <div class="grid grid-cols-4 gap-4 text-center text-sm">
@@ -29,7 +27,6 @@
                     </div>
                 </div>
 
-                <!-- Inventory Summary -->
                 <div class="bg-white p-4 rounded shadow">
                     <h2 class="text-lg font-semibold mb-4">Inventory Summary</h2>
                     <div class="text-sm space-y-2">
@@ -45,6 +42,62 @@
                 </div>
             </div>
 
+
+{{-- <input type="text" id="barcode-input" placeholder="Enter Barcode" class="p-2 border rounded">
+<div id="item-details" class="mt-4"></div>
+
+<script>
+    document.getElementById('barcode-input').addEventListener('input', function() {
+        let barcode = this.value;
+        if (barcode.length > 3) {
+            fetch(`/item-by-barcode/${barcode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('item-details').innerHTML = `<p class="text-red-500">${data.error}</p>`;
+                    } else {
+                        document.getElementById('item-details').innerHTML = `
+                            <h2 class="text-lg font-bold">${data.name}</h2>
+                            <p><strong>Price:</strong> ₹${data.price}</p>
+                            <p><strong>Description:</strong> ${data.description}</p>
+                        `;
+                    }
+                });
+        }
+    });
+</script> --}}
+
+
+
+<input type="text" id="barcode" placeholder="Enter barcode" style="padding: 8px; width: 200px;" />
+
+<div id="item-details" class="box" style="margin-top: 20px;"></div>
+
+<script>
+    document.getElementById('barcode').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            let barcode = this.value.trim(); 
+            if (barcode.length > 0) {
+                fetch(`/item-by-barcode/${barcode}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let box = document.getElementById('item-details');
+
+                        if (data.error) {
+                            box.innerHTML = `<p style="color:red;">${data.error}</p>`;
+                        } else {
+                            box.innerHTML = `
+                                <h3>${data.name}</h3>
+                                <p><strong>Price:</strong> ₹${data.price}</p>
+                                <p><strong>Description:</strong> ${data.description}</p>
+                            `;
+                        }
+                         document.getElementById('barcode').value = '';
+                    });
+            }
+        }
+    });
+</script>
 
 
             @endsection

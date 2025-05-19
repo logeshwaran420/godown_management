@@ -19,17 +19,11 @@ class InwardFactory extends Factory
      */
     public function definition(): array
     {
-        return [
+         return [
             'date' => $this->faker->date(),
-            'ledger_id' => Ledger::inRandomOrder()->first()->id, 
-            'item_id' => Item::inRandomOrder()->first()->id, 
-            'warehouse_id' => Warehouse::inRandomOrder()->first()->id, 
-            'quantity' => $this->faker->numberBetween(1, 200), 
-            'price' => $this->faker->randomFloat(2, 10, 500), 
-            'total_amount' => function (array $total) {
-                return $total['price'] * $total['quantity'];
-            },
-            'invoice_no' => $this->faker->optional()->word, 
+            'ledger_id' => Ledger::inRandomOrder()->first()->id,
+            'warehouse_id' => Warehouse::inRandomOrder()->first()->id,
+            'invoice_no' => $this->faker->unique()->numerify('INV-#####'),
         ];
     }
 }

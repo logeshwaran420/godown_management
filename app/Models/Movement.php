@@ -10,10 +10,11 @@ class Movement extends Model
     use HasFactory;
 
     protected $guarded = [];
-    public function item()
-    {
-        return $this->belongsTo(Item::class);
-    }
+   public function items()
+{
+    return $this->hasMany(MovementDetail::class);
+}
+
 
       public function fromWarehouse()
     {

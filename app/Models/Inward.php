@@ -15,13 +15,25 @@ class Inward extends Model
         return $this->belongsTo(Ledger::class);
     }
 
-        public function item()
+      public function details()
     {
-        return $this->belongsTo(Item::class);
+        return $this->hasMany(InwardDetail::class); // Each outward has many outward details
     }
 
        public function warehouse()
     {
         return $this->belongsTo(Warehouse::class);
     }
+
+    public function updateTotals()
+{
+    $details = $this->details()->get();
+
+    $this->total_quantity = $details->sum('quantity');
+    $this->total_amount = $details->sum(function ($detail) {
+        return $detail->quantity * $detail->price;
+    });
+
+    $this->save();
+}
 }

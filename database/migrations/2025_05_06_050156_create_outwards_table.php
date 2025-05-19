@@ -14,20 +14,14 @@ return new class extends Migration
             $table->id();
             $table->date('date');
             $table->foreignId('ledger_id')->constrained()->onDelete('cascade');
-            $table->foreignId('item_id')->constrained()->onDelete('cascade');
             $table->foreignId('warehouse_id')->constrained()->onDelete('cascade');
-            $table->integer('quantity');
-            $table->decimal('price', 10, 2);
-            $table->decimal('total_amount', 12, 2);
             $table->string('invoice_no')->nullable();
+            $table->integer('total_quantity')->default(0);
+            $table->decimal('total_amount', 12, 2)->default(0);
             $table->timestamps();
         });
         
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('outwards');

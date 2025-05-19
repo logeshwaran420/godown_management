@@ -22,6 +22,6 @@
      <livewire:login-form />
     </div>
   </div> 
-  @livewireScripts
+l
 </body>
 </html>

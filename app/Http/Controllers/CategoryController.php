@@ -7,10 +7,7 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    public function create(){
-        return view('inventory.categories.create');
-    }
-
+    
     public function store(Request $request){
        
       $validated = $request->validate([
@@ -36,29 +33,13 @@ class CategoryController extends Controller
 
     }
 
-
-
-
-
-
-
-
-
-
-
-
-    public function destroy(Request $request)
+    public function destroy(Category $category)
     {
-        $ids = $request->input('ids', []);
-
-        Category::whereIn('id', $ids)->delete();
-
-        return back();
+        
+   $category->delete();
+   return redirect()->route('inventory.categories');
     }
 
-     public function movements(){
-
-        return view('inventory.movements.index');
-    }
+    
 }
 

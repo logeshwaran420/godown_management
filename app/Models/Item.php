@@ -10,7 +10,7 @@ class Item extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'category_id', 'unit_id', 'hsn_code', 'description', 'price', 'image', 'current_stock'
+        'name',  'barcode','category_id', 'unit_id', 'hsn_code', 'description', 'price', 'image', 'current_stock'
     ];
 
     public function category()
@@ -28,5 +28,4 @@ class Item extends Model
         return $this->hasMany(Inventory::class);
     }
 
-   
 }

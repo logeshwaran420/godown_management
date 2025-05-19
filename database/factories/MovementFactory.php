@@ -22,16 +22,14 @@ class MovementFactory extends Factory
     {
         return [
             'date' => $this->faker->date(),
-            'item_id' => Item::inRandomOrder()->first()->id,
             'from_warehouse_id' => Warehouse::inRandomOrder()->first()->id, 
-            'to_warehouse_id' => Warehouse::inRandomOrder()->first()->id,
-            'quantity' => $this->faker->numberBetween(1, 200),             
+            'to_warehouse_id' => Warehouse::inRandomOrder()->first()->id,           
         ];      
     }
 
-    public function configure(){
-        return $this->afterCreating(function (Movement $movement){
+    // public function configure(){
+    //     return $this->afterCreating(function (Movement $movement){
            
-        });
-    }
+    //     });
+    // }
 }

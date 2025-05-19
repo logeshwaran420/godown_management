@@ -25,47 +25,22 @@ class LoginForm extends Component
             'password' => 'required',
             'warehouse_id' => 'required|exists:warehouses,id',
         ]);
-
-     
-   
-        if (Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
-    $user = Auth::user();
-
-    $user->warehouse_id = $this->warehouse_id;
-    $user->save();
-
-   session(['warehouse_id' => $this->warehouse_id]);
-
-    return redirect()->route('home');
-}
-    }
-
-        // $this->addError('email', 'Invalid credentials');
-
         
-    // if (Auth::attempt($credentials)) {
-    //     return redirect()->route('home');
-    // }
+        if (Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
+           session(['warehouse_id' => $this->warehouse_id]); 
 
-// 
-    // $this->addError('email', 'Invalid credentials or warehouse');
-//     // }
-// public function login()
-// {
-//     $this->validate([
-//         'email' => 'required|email',
-//         'password' => 'required',
-//         'warehouse_id' => 'required|exists:warehouses,id',
-//     ]);
+                   $user = Auth::user();
 
-   
-//         if (Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
-//             session(['warehouse_id' => $this->warehouse_id]);
-//             return redirect()->route('home');
-//         }
+       $token = $user->createToken('warehouse-app')->plainTextToken;
 
-//     $this->addError('email', 'Invalid credentials');
-// }
+       session(['api_token' => $token]);
+
+         
+           return redirect()->route('home');
+}
+}
+
+       
     public function render()
     {
         return view('livewire.login-form');

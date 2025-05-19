@@ -9,6 +9,9 @@ class Warehouse extends Model
 {
     use HasFactory;
 
+
+     
+
     protected $guarded = [];
 
    public function inventories()
@@ -30,5 +33,8 @@ class Warehouse extends Model
     {
         return $this->hasMany(User::class);
     }
+
+
+  
 
 }
