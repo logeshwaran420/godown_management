@@ -16,10 +16,9 @@
     </div>
     <div class="w-full md:w-1/2 p-8">
       <div class="flex flex-col items-center">
-        {{-- <img src="https://lsc-india.com/wp-content/uploads/2021/08/LSC_logo.png" alt="LSC Logo" class="h-16 mb-2"> --}}
         <h2 class="text-2xl font-bold mb-6 text-center">Godown Management System</h2>
       </div>
-     <livewire:login-form />
+      <livewire:login-form /> 
     </div>
   </div> 
 l

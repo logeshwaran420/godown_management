@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Item;
+use App\Models\Ledger;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -52,15 +53,28 @@ class ItemController extends Controller
     return back();
 }
 
-public function getByBarcode($barcode)
-{
-    $item = Item::with('category','unit')->where('barcode', $barcode)->first();
 
-    if ($item) {
+   public function findByBarcode($barcode)
+    {
+        $item = Item::with('category','unit')->where('barcode', $barcode)->first();
+        
+        if (!$item) {
+            return response()->json(['message' => 'Item not found'], 404);
+        }
         return response()->json($item);
     }
 
-    return response()->json(['error' => 'Item not found'], 404);
-}
+// public function getByLedger($ledger)
+// {
+//     $ledger = Ledger::where('name', $ledger)
+//                     ->orWhere('code', $ledger)
+//                     ->first();
+
+//     if (!$ledger) {
+//         return response()->json(['message' => 'Ledger not found'], 404);
+//     }
+
+//     return response()->json($ledger);
+// }
 
 }

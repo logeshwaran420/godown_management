@@ -18,14 +18,17 @@ class OutwardController extends Controller
 
 
         
-          $warehouseId = session('warehouse_id');
+    //       $warehouseId = session('warehouse_id');
 
-    $outwards = Outward::where('warehouse_id', $warehouseId)
-                    ->latest()
-                    ->paginate(5);
+    // $outwards = Outward::where('warehouse_id', $warehouseId)
+    //                 ->latest()
+    //                 ->paginate(5);
 
     
-return view('outward.index',compact('outwards'));
+return view('outward.index',
+// compact('outwards')
+
+);
     }
 public function create()
 {
@@ -51,7 +54,9 @@ public function create()
     
     $ledgers = Ledger::where('type', 'customer')->get();
 
-    return view('outward.create', compact('ledgers', 'items'));
+    return view('outward.create', 
+     compact('ledgers', 'items')
+);
 }
 public function store(Request $request)
 {
@@ -113,7 +118,7 @@ public function store(Request $request)
 
             if ($inventory) {
                 $inventory->decrement('current_stock', $itemData['quantity']);
-            } else {
+            }else {
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
@@ -160,6 +165,36 @@ public function store(Request $request)
 public function show(Outward $outward){
     return view("outward.show",compact("outward"));
 }
+
+     public function search($query)
+    {
+        $ledgers = Ledger::where('type', 'customer')
+            ->where('name', 'LIKE', "%{$query}%")
+            ->get(['id', 'name']);
+
+        return response()->json($ledgers);
+    }
+
+    public function findByBarcode($barcode){
+    $warehouseId = session('warehouse_id');
+
+    $inventory = Inventory::with('item.category', 'item.unit')
+        ->where('warehouse_id', $warehouseId)
+        ->whereHas('item', function ($query) use ($barcode) {
+            $query->where('barcode', $barcode);
+        })
+        ->first();
+
+    if (!$inventory || !$inventory->item) {
+        return response()->json(['message' => 'Item not found in this warehouse'], 404);
+    }
+
+    $item = $inventory->item;
+    $item->current_stock = $inventory->current_stock;
+
+    return response()->json($item);
+}
+
 
 
 }

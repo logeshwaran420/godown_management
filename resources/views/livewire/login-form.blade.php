@@ -1,7 +1,6 @@
 <form wire:submit.prevent="login" class="space-y-4" method="post">
     @csrf
 
-    
     <div>
       <label for="warehouse_id" class="block font-semibold mb-1">Warehouse:</label>
       <select id="warehouse_id" wire:model="warehouse_id"

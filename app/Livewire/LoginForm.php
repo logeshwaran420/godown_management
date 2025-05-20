@@ -15,7 +15,9 @@ class LoginForm extends Component
 
     public function mount()
     {
+     
         $this->warehouses = Warehouse::all();
+        
     }
 
     public function login()

@@ -62,4 +62,16 @@ return view('ledger.index',compact('ledgers'));
    $ledger->delete();
     return redirect()->route('ledgers')->with('success', 'Ledger deleted successfully.');
     }
+    
+    
+    public function search($ledger)
+{
+    return Ledger::where('type', 'supplier')
+                 ->where('name', 'LIKE', "%{$ledger}%")
+                 ->get(['id', 'name']);
+}
+
+
+
+
 }

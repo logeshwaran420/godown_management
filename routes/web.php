@@ -9,6 +9,7 @@ use App\Http\Controllers\MovementController;
 use App\Http\Controllers\OutwardController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\TestController;
 use App\Models\Item;
 use Illuminate\Support\Facades\Route;
 
@@ -102,9 +103,33 @@ Route::get('/test', function () {
 });
 
 
-Route::get('/item-by-barcode/{barcode}', [ItemController::class, 'getByBarcode']);
+// Route::get('/item-by-barcode/{barcode}', [ItemController::class, 'getByBarcode']);
+// Route::get('/ledger/{ledger}', [ItemController::class, 'getbyledger']);
+
+// Route::get('/ledger/{ledger}', [LedgerController::class, 'search']); // Ledger search API
+// Route::get('/barcode/{barcode}', [ItemController::class, 'searchByBarcode']);
+
+
+Route::get('/ledger/{ledger}', [LedgerController::class, 'search']);
+Route::get('/items/{barcode}', [ItemController::class, 'findByBarcode']);
+
+
+
+
+Route::get('/supplier/{ledger}', [LedgerController::class, 'search']);
+Route::get('/inward/{barcode}', [InwardController::class, 'findByBarcode']);
+
+
+Route::get('/outward/{barcode}', [OutwardController::class, 'findByBarcode']);
+
+
+Route::get('/customer/{query}', [OutwardController::class, 'search']);
+
+Route::get('/test/create', [TestController::class, 'create'])->name('test.create');
+Route::post('/test/store', [TestController::class, 'store'])->name('test.store');
+
+
 
 // Route::get('/item-by-barcode/{barcode}', [ItemController::class, 'getByBarcode']);
-
 // Route::get('/items', [\App\Http\Controllers\Api\ItemController::class, 'showByBarcode']); 
 // Route::get('/ledgers', [\App\Http\Controllers\Api\LedgerController::class, 'search']); 
