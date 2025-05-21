@@ -16,19 +16,16 @@ class OutwardController extends Controller
 {
     public function index(){
 
-
         
-    //       $warehouseId = session('warehouse_id');
+          $warehouseId = session('warehouse_id');
 
-    // $outwards = Outward::where('warehouse_id', $warehouseId)
-    //                 ->latest()
-    //                 ->paginate(5);
+    $outwards = Outward::where('warehouse_id', $warehouseId)
+                    ->latest()
+                    ->paginate(5);
 
     
 return view('outward.index',
-// compact('outwards')
-
-);
+ compact('outwards'));
     }
 public function create()
 {

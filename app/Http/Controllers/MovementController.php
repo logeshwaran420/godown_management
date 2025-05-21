@@ -44,6 +44,72 @@ return view("movement.index",compact('movements'));
         }
 
 
+// public function store(Request $request)
+// {
+//     $request->validate([
+//         'from_warehouse_id' => 'required|exists:warehouses,id',
+//         'to_warehouse_id' => 'required|exists:warehouses,id|different:from_warehouse_id',
+//         'date' => 'required|date',
+//         'items' => 'required|array',
+//     ]);
+    
+//     DB::transaction(function () use ($request) {
+     
+//         $movement = Movement::create([
+//             'from_warehouse_id' => $request->from_warehouse_id,
+//             'to_warehouse_id' => $request->to_warehouse_id,
+//             'date' => $request->date,
+//             'total_quantity' => 0, 
+//           ]);
+
+//         $totalQty = 0;
+
+//         foreach ($request->items as $itemId => $data) {
+//             $qty = $data['qty'];
+
+//             $fromInventory = Inventory::where('warehouse_id', $request->from_warehouse_id)
+//                 ->where('item_id', $itemId)
+//                 ->lockForUpdate()
+//                 ->first();
+
+//             if (!$fromInventory || $fromInventory->current_stock < $qty) {
+//                 throw new \Exception("Not enough stock for item {$data['name']} in source warehouse.");
+//             }
+
+//             $fromInventory->decrement('current_stock', $qty);
+
+//             $toInventory = Inventory::firstOrCreate(
+//                 [
+//                     'warehouse_id' => $request->to_warehouse_id,
+//                     'item_id' => $itemId,
+//                 ],  
+//                 [
+//                     'current_stock' => 0,
+//                 ]
+//             );
+
+//             $toInventory->increment('current_stock', $qty);
+
+//             MovementDetail::create([
+//                 'movement_id' => $movement->id,
+//                 'item_id' => $itemId,
+//                 'barcode' => $data['barcode'],
+//                 'name' => $data['name'],
+//                 'quantity' => $qty,
+//             ]);
+
+//             $totalQty += $qty;
+//         }
+
+//      $movement->update(['total_quantity' => $totalQty]);
+//     });
+
+//     return redirect()->route('movements')->with('success', 'Movement created successfully.');
+// }
+
+
+
+
 public function store(Request $request)
 {
     $request->validate([
@@ -54,19 +120,21 @@ public function store(Request $request)
     ]);
 
     DB::transaction(function () use ($request) {
-     
+
+        // Create movement record first with total_quantity=0, will update later
         $movement = Movement::create([
             'from_warehouse_id' => $request->from_warehouse_id,
             'to_warehouse_id' => $request->to_warehouse_id,
             'date' => $request->date,
-            'total_quantity' => 0, 
-          ]);
+            'total_quantity' => 0,
+        ]);
 
         $totalQty = 0;
 
         foreach ($request->items as $itemId => $data) {
-            $qty = $data['quantity'];
+            $qty = $data['qty'];
 
+            // Lock inventory record in source warehouse for update (to prevent race conditions)
             $fromInventory = Inventory::where('warehouse_id', $request->from_warehouse_id)
                 ->where('item_id', $itemId)
                 ->lockForUpdate()
@@ -76,20 +144,28 @@ public function store(Request $request)
                 throw new \Exception("Not enough stock for item {$data['name']} in source warehouse.");
             }
 
+            // Decrease stock in source warehouse
             $fromInventory->decrement('current_stock', $qty);
 
-            $toInventory = Inventory::firstOrCreate(
-                [
+            // Check if inventory record exists for this item in the destination warehouse
+            $toInventory = Inventory::where('warehouse_id', $request->to_warehouse_id)
+                ->where('item_id', $itemId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($toInventory) {
+                // If exists, increase stock by qty
+                $toInventory->increment('current_stock', $qty);
+            } else {
+                // Else create new inventory record with current_stock = qty
+                Inventory::create([
                     'warehouse_id' => $request->to_warehouse_id,
                     'item_id' => $itemId,
-                ],
-                [
-                    'current_stock' => 0,
-                ]
-            );
+                    'current_stock' => $qty,
+                ]);
+            }
 
-            $toInventory->increment('current_stock', $qty);
-
+            // Create movement detail
             MovementDetail::create([
                 'movement_id' => $movement->id,
                 'item_id' => $itemId,
@@ -101,11 +177,15 @@ public function store(Request $request)
             $totalQty += $qty;
         }
 
-     $movement->update(['total_quantity' => $totalQty]);
+        // Update total quantity in movement record
+        $movement->update(['total_quantity' => $totalQty]);
     });
 
     return redirect()->route('movements')->with('success', 'Movement created successfully.');
 }
+
+
+
 
 public function show(movement $movement){
 

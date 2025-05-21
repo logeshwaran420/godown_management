@@ -53,6 +53,7 @@ Route::get('/',[InwardController::class,'index'])->name('inwards');
   Route::get('/create',[InwardController::class,'create'])->name('inwards.create');
   Route::post('/store',[InwardController::class,'store'])->name('inwards.store');
   Route::get('/show/{inward}',[InwardController::class,'show'])->name('inwards.show');
+  Route::get('/edit/{inward}',[InwardController::class,'edit'])->name('inwards.edit');
 
 });
 
@@ -116,14 +117,14 @@ Route::get('/items/{barcode}', [ItemController::class, 'findByBarcode']);
 
 
 
-Route::get('/supplier/{ledger}', [LedgerController::class, 'search']);
+Route::get('/supplier/{ledger}', [InwardController::class, 'search']);
 Route::get('/inward/{barcode}', [InwardController::class, 'findByBarcode']);
 
 
+
 Route::get('/outward/{barcode}', [OutwardController::class, 'findByBarcode']);
-
-
 Route::get('/customer/{query}', [OutwardController::class, 'search']);
+
 
 Route::get('/test/create', [TestController::class, 'create'])->name('test.create');
 Route::post('/test/store', [TestController::class, 'store'])->name('test.store');

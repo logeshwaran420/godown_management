@@ -34,7 +34,7 @@
     </div>
 </div>
 
- <x-layout.nav-link href="{{ route('inwards') }}" :active="request()->routeIs('inwards','inwards.create','inwards.show')">
+ <x-layout.nav-link href="{{ route('inwards') }}" :active="request()->routeIs('inwards','inwards.create','inwards.show','inwards.edit')">
             Inward
         </x-layout.nav-link>
 

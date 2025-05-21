@@ -64,12 +64,6 @@ return view('ledger.index',compact('ledgers'));
     }
     
     
-    public function search($ledger)
-{
-    return Ledger::where('type', 'supplier')
-                 ->where('name', 'LIKE', "%{$ledger}%")
-                 ->get(['id', 'name']);
-}
 
 
 
