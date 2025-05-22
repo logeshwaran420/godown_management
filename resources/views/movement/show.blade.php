@@ -7,7 +7,19 @@
     }, 0);
 @endphp
 
+<div class="w-full mx-auto bg-white px-4 py-6">
 
+ <div class="flex justify-between items-center border-b px-6 py-4">
+        <h2 class="text-xl font-semibold">Movements Details</h2>
+
+
+        <button type="button" 
+        onclick="window.location='{{ route('movements.edit',$movement) }}'"
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+    Edit
+</button>
+  
+    </div>
 
 
     <div class="grid grid-cols-1 md:grid-cols-4 border-b gap-4 p-6">
@@ -100,5 +112,7 @@
             </table>
         </div>
     </div>
+</div>
+
 </div>
 @endsection

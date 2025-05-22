@@ -1,14 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-<form method="POST" action="{{ route('inwards.update', $inward->id) }}">
+
+
+
+<form method="POST" action="{{ route('outwards.update', $outward->id) }}">
     @csrf
     @method('PUT')
 
     <div class="w-full mx-auto bg-white px-4 py-6">
 
         <div class="flex justify-between items-center border-b px-6 py-4">
-            <h2 class="text-xl font-semibold">Edit Inward </h2>
+            <h2 class="text-xl font-semibold">Edit Outward </h2>
             <button type="submit" id="saveBtn"
                 class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                 Save
@@ -23,16 +26,17 @@
                     id="formDate" 
                     name="date"
                     class="mt-1 block w-full border rounded px-3 py-2"
-                    value="{{ $inward->date }}"
+                    value="{{ $outward->date }}"
                     max="{{ date('Y-m-d') }}" 
                     required>
-                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-gray-700">Ledger</label>
                 <select id="ledgerInput" name="ledger_id"
                     class="mt-1 block w-full border rounded px-3 py-2 bg-white" required>
                     @foreach ($ledgers as $ledger)
-                        <option value="{{ $ledger->id }}" {{ $ledger->id == $inward->ledger_id ? 'selected' : '' }}>
+                        <option value="{{ $ledger->id }}" {{ $ledger->id == $outward->ledger_id ? 'selected' : '' }}>
                             {{ $ledger->name }}
                         </option>
                     @endforeach
@@ -47,7 +51,7 @@
         </div>
 
         <div class="px-6 py-2 pb-6">
-            <h3 class="font-semibold text-lg mb-4">Inwards Item Details</h3>
+            <h3 class="font-semibold text-lg mb-4">Outwards Item Details</h3>
             <div class="overflow-x-auto w-full">
                 <table class="w-full text-sm text-gray-500 border border-gray-200">
                     <thead class="bg-gray-50 text-xs uppercase text-gray-700 text-center">
@@ -64,27 +68,30 @@
                         </tr>
                     </thead>
                     <tbody class="text-center text-black">
-                        @foreach ($inward->details as $index => $detail)
+                        @foreach ($outward->details as $index => $detail)
                             <tr>
                                 <td><input type="checkbox" class="rowCheckbox"></td>
                                 <td class="border px-2 py-2">{{ $index + 1 }}</td>
                                 <td class="border px-2 py-2">{{ $detail->item->barcode }}</td>
                                 <td class="border px-2 py-2">
-                                    <select name="category_ids[]" class="w-full border rounded px-2 py-1">
+                                    {{ $detail->item->category->name }}
+                                    {{-- <select name="category_ids[]" class="w-full border rounded px-2 py-1">
                                         @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}" {{ $category->id == $detail->item->category_id ? 'selected' : '' }}>
+                                            <option value="{{ $category->id }}" {{ $category->id == ? 'selected' : '' }}>
                                                 {{ $category->name }}
                                             </option>
                                         @endforeach
-                                    </select>
+                                    </select> --}}
                                 </td>
                                 <td class="border px-2 py-2">
-                                    <input type="text" name="item_names[]" value="{{ $detail->item->name }}"
-                                        class="w-full border rounded px-2 py-1 text-center">
+                                    {{ $detail->item->name }}
+                                    {{-- <input type="text" name="item_names[]" value=""
+                                        class="w-full border rounded px-2 py-1 text-center"> --}}
                                 </td>
                                 <td class="border px-2 py-2">
-                                    <input type="text" name="hsn_codes[]" value="{{ $detail->item->hsn_code }}"
-                                        class="w-full border rounded px-2 py-1 text-center">
+                                    {{ $detail->item->hsn_code }}
+                                    {{-- <input type="text" name="hsn_codes[]" value=""
+                                        class="w-full border rounded px-2 py-1 text-center"> --}}
                                 </td>
                                 <td class="border px-2 py-2">
                                     <input type="number" name="quantities[]" value="{{ $detail->quantity }}"
@@ -92,13 +99,14 @@
                                         data-rate="{{ $detail->item->price }}">
                                 </td>
                                 <td class="border px-2 py-2">
-                                    <select name="unit_ids[]" class="w-full border rounded px-2 py-1">
+                                    {{ $detail->item->unit->abbreviation }}
+                                    {{-- <select name="unit_ids[]" class="w-full border rounded px-2 py-1">
                                         @foreach ($units as $unit)
-                                            <option value="{{ $unit->id }}" {{ $unit->id == $detail->item->unit_id ? 'selected' : '' }}>
+                                            <option value="{{ $unit->id }}" {{ $unit->id ==  ? 'selected' : '' }}>
                                                 {{ $unit->name }}
                                             </option>
                                         @endforeach
-                                    </select>
+                                    </select> --}}
                                 </td>
                                 <td class="border px-2 py-2 rate-cell">{{ $detail->item->price }}</td>
 
@@ -125,11 +133,11 @@
                 <table class="text-sm border">
                     <tr>
                         <th class="border px-2 py-2 text-left">Total Qty</th>
-                        <td class="border px-2 py-2 total-qty">{{ $inward->total_quantity }}</td>
+                        <td class="border px-2 py-2 total-qty">{{ $outward->total_quantity }}</td>
                     </tr>
                     <tr>
                         <th class="border px-2 py-2 text-left">Total Amount</th>
-                        <td class="border px-2 py-2 total-amount">{{ number_format($inward->total_amount, 2) }}</td>
+                        <td class="border px-2 py-2 total-amount">{{ number_format($outward->total_amount, 2) }}</td>
                     </tr>
                 </table>
             </div>
@@ -142,7 +150,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const barcodeInput = document.getElementById("barcodeInput");
     const tbody = document.querySelector("tbody");
     const deleteBtn = document.getElementById("deleteSelectedBtn");
-    let slnoCounter = {{ $inward->details->count() + 1 }};
+    let slnoCounter = {{ $outward->details->count() + 1 }};
 
     function calculateTotals() {
         let totalQty = 0;
@@ -184,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const barcode = barcodeInput.value.trim();
             if (!barcode) return;
 
-            fetch(`/inward/${barcode}`)
+            fetch(`/outward/${barcode}`)
                 .then(res => {
                     if (!res.ok) throw new Error("Item not found");
                     return res.json();
@@ -225,30 +233,49 @@ document.addEventListener("DOMContentLoaded", function () {
                         tbody.appendChild(tr);
                         bindRowEvents(tr);
                     }
-
-                    barcodeInput.value = '';
-                    barcodeInput.focus();
                     calculateTotals();
+                    barcodeInput.value = '';
                 })
                 .catch(err => {
-                    alert(err.message || "Failed to fetch item");
+                    alert(err.message);
                 });
         }
     });
 
     deleteBtn.addEventListener("click", function () {
-        document.querySelectorAll(".rowCheckbox:checked").forEach(cb => {
-            cb.closest("tr").remove();
+        document.querySelectorAll(".rowCheckbox:checked").forEach(chk => {
+            chk.closest("tr").remove();
         });
-
-        deleteBtn.classList.add("hidden");
         calculateTotals();
+        toggleDeleteButton();
     });
 
-    // Bind events to existing rows on page load
+    // Bind existing rows events
     tbody.querySelectorAll("tr").forEach(bindRowEvents);
 
     calculateTotals();
 });
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @endsection

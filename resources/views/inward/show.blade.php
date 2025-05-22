@@ -52,7 +52,7 @@
     <tbody>
         @foreach ($inward->details as $detail)
             
-        @endforeach
+     
        <tr 
         >
             <td class="border px-6 py-4 ">
@@ -86,6 +86,9 @@
                  {{ $detail->item->price }}
             </td>
         </tr>
+
+
+           @endforeach
     </tbody>
 </table> 
 

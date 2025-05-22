@@ -6,6 +6,13 @@
 
     <div class="flex justify-between items-center border-b px-6 py-4">
         <h2 class="text-xl font-semibold">Movements Details</h2>
+
+
+        <button type="button" 
+        onclick="window.location='{{ route('outwards.edit',$outward) }}'"
+        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+    Edit
+</button>
   
     </div>
 

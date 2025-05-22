@@ -160,6 +160,164 @@ public function edit(inward $inward){
 }
 
 
+public function update(Request $request, Inward $inward)
+{
+    $warehouseId = session('warehouse_id');
+
+    $validated = $request->validate([
+        'date' => 'required|date',
+        'ledger_id' => 'required|exists:ledgers,id',
+        'item_ids' => 'required|array',
+        'quantities' => 'required|array',
+        'quantities.*' => 'numeric|min:1',
+        'rates' => 'required|array',
+        'rates.*' => 'numeric|min:0',
+        'category_ids' => 'required|array',
+        'category_ids.*' => 'exists:categories,id',
+        'unit_ids' => 'required|array',
+        'unit_ids.*' => 'exists:units,id',
+        'item_names' => 'required|array',
+        'item_names.*' => 'string|max:255',
+        'hsn_codes' => 'required|array',
+        'hsn_codes.*' => 'string|max:255',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        $inward->update([
+            'date' => $request->date,
+            'ledger_id' => $request->ledger_id,
+            'total_quantity' => array_sum($request->quantities),
+            'total_amount' => collect($request->quantities)->zip($request->rates)->sum(function ($pair) {
+                return $pair[0] * $pair[1];
+            }),
+        ]);
+
+        $oldDetails = $inward->details()->get()->keyBy('item_id');
+
+        $newItems = [];
+        foreach ($request->item_ids as $index => $itemId) {
+            $newItems[$itemId] = [
+                'quantity' => $request->quantities[$index],
+                'rate' => $request->rates[$index],
+                'category_id' => $request->category_ids[$index],
+                'unit_id' => $request->unit_ids[$index],
+                'name' => $request->item_names[$index],
+                'hsn_code' => $request->hsn_codes[$index],
+            ];
+        }
+
+        $processedItemIds = [];
+
+        foreach ($newItems as $itemId => $data) {
+            $quantityNew = $data['quantity'];
+            $rateNew = $data['rate'];
+            $categoryId = $data['category_id'];
+            $unitId = $data['unit_id'];
+            $itemName = $data['name'];
+            $hsnCode = $data['hsn_code'];
+
+            if ($oldDetails->has($itemId)) {
+                $oldDetail = $oldDetails[$itemId];
+                $quantityOld = $oldDetail->quantity;
+
+                $difference = $quantityNew - $quantityOld;
+
+                $oldDetail->update([
+                    'quantity' => $quantityNew,
+                    'price' => $rateNew,
+                    'total_amount' => $quantityNew * $rateNew,
+                ]);
+
+                $item = Item::find($itemId);
+                if ($item) {
+                    $item->update([
+                        'category_id' => $categoryId,
+                        'unit_id' => $unitId,
+                        'name' => $itemName,
+                        'hsn_code' => $hsnCode,
+                        'price' => $rateNew, // optional if you want to update
+                    ]);
+
+                    if ($difference != 0) {
+                        $item->increment('current_stock', $difference);
+                    }
+                }
+
+                $inventory = Inventory::firstOrCreate(
+                    ['item_id' => $itemId, 'warehouse_id' => $warehouseId],
+                    ['current_stock' => 0]
+                );
+                if ($difference != 0) {
+                    $inventory->increment('current_stock', $difference);
+                }
+
+                $processedItemIds[] = $itemId;
+            } else {
+                // New item detail
+                InwardDetail::create([
+                    'inward_id' => $inward->id,
+                    'item_id' => $itemId,
+                    'quantity' => $quantityNew,
+                    'price' => $rateNew,
+                    'total_amount' => $quantityNew * $rateNew,
+                ]);
+
+                $item = Item::find($itemId);
+                if ($item) {
+                    $item->update([
+                        'category_id' => $categoryId,
+                        'unit_id' => $unitId,
+                        'name' => $itemName,
+                        'hsn_code' => $hsnCode,
+                        'price' => $rateNew,
+                    ]);
+
+                    $item->increment('current_stock', $quantityNew);
+                }
+
+                $inventory = Inventory::firstOrCreate(
+                    ['item_id' => $itemId, 'warehouse_id' => $warehouseId],
+                    ['current_stock' => 0]
+                );
+                $inventory->increment('current_stock', $quantityNew);
+
+                $processedItemIds[] = $itemId;
+            }
+        }
+
+        $deletedItems = $oldDetails->keys()->diff($processedItemIds);
+        foreach ($deletedItems as $deletedItemId) {
+            $oldDetail = $oldDetails[$deletedItemId];
+            $quantityOld = $oldDetail->quantity;
+
+            $item = Item::find($deletedItemId);
+            if ($item) {
+                $item->decrement('current_stock', $quantityOld);
+            }
+
+            $inventory = Inventory::where('item_id', $deletedItemId)
+                ->where('warehouse_id', $warehouseId)
+                ->first();
+
+            if ($inventory) {
+                $inventory->decrement('current_stock', $quantityOld);
+            }
+
+            $oldDetail->delete();
+        }
+
+        DB::commit();
+
+        return redirect()->route('inwards.show', compact('inward'))->with('success', 'Inward updated successfully.');
+    } catch (\Exception $e) {
+        DB::rollback();
+        return back()->withErrors(['error' => 'Failed to update inward: ' . $e->getMessage()]);
+    }
+}
+
+
 
 
 }

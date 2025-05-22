@@ -388,3 +388,187 @@ function customerSearch(data) {
 }
 
    </script>
+
+
+
+
+
+
+@extends('layouts.app')
+
+@section('content')
+<div class="w-full mx-auto bg-white px-4 py-6">
+
+    <div class="flex justify-between items-center border-b px-6 py-4">
+        <h2 class="text-xl font-semibold">Inward Details</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b p-6">
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Barcode</label>
+            <input type="text" id="barcodeInput" placeholder="Enter Barcode"
+                class="mt-1 block w-full border rounded px-3 py-2" autofocus>
+        </div>
+    </div>
+
+    <div class="px-6 py-2 pb-6">
+        <h3 class="font-semibold text-lg mb-4">Inwards Item Details</h3>
+
+        <div class="overflow-x-auto w-full">
+            <table class="w-full text-sm text-gray-500 border border-gray-200">
+                <thead class="bg-gray-50 text-xs uppercase text-gray-700 text-center">
+                    <tr>
+                        <th class="border px-2 py-2">Select</th>
+                        <th class="border px-2 py-2">Slno</th>
+                        <th class="border px-2 py-2">Bar Code</th>
+                        <th class="border px-2 py-2">Category</th>
+                        <th class="border px-2 py-2">Item</th>
+                        <th class="border px-2 py-2">HSN</th>
+                        <th class="border px-2 py-2">Qty</th>
+                        <th class="border px-2 py-2">Unit</th>
+                        <th class="border px-2 py-2">Rate</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsTableBody" class="text-center text-black">
+                    <!-- Dynamic rows -->
+                </tbody>
+            </table>
+
+            <button type="button" id="deleteSelectedBtn"
+                class="mt-4 bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600 hidden">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-6 border-t px-6 py-4">
+        <h3 class="font-semibold mb-2">Summary</h3>
+        <table class="text-sm border">
+            <tr>
+                <th class="border px-2 py-2 text-left">Total Qty</th>
+                <td class="border px-2 py-2 total-qty">0</td>
+            </tr>
+            <tr>
+                <th class="border px-2 py-2 text-left">Total Amount</th>
+                <td class="border px-2 py-2 total-amount">0.00</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const barcodeInput = document.getElementById("barcodeInput");
+    const tbody = document.getElementById("itemsTableBody");
+    const deleteBtn = document.getElementById("deleteSelectedBtn");
+    const totalQtyEl = document.querySelector(".total-qty");
+    const totalAmountEl = document.querySelector(".total-amount");
+
+    barcodeInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const barcode = barcodeInput.value.trim();
+            if (!barcode) return;
+
+            fetch(`/outward/${barcode}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Item not found");
+                    return res.json();
+                })
+                .then(item => {
+                    const existingRow = Array.from(tbody.querySelectorAll("tr")).find(
+                        row => row.dataset.barcode === item.barcode
+                    );
+
+                    if (existingRow) {
+                        const qtyInput = existingRow.querySelector(".qty-input");
+                        const currentQty = parseInt(qtyInput.value) || 0;
+                        const maxQty = parseInt(qtyInput.max) || item.current_stock;
+
+                        if (currentQty + 1 <= maxQty) {
+                            qtyInput.value = currentQty + 1;
+                        } else {
+                            alert("Stock limit reached.");
+                        }
+
+                        calculateTotals();
+                        barcodeInput.value = "";
+                        return;
+                    }
+
+                    // Append new row
+                    const row = document.createElement("tr");
+                    row.dataset.barcode = item.barcode;
+                    row.innerHTML = `
+                        <td><input type="checkbox" class="rowCheckbox"></td>
+                        <td class="border px-2 py-2">${tbody.children.length + 1}</td>
+                        <td class="border px-2 py-2">${item.barcode}</td>
+                        <td class="border px-2 py-2">${item.category.name}</td>
+                        <td class="border px-2 py-2">${item.name}</td>
+                        <td class="border px-2 py-2">${item.hsn_code}</td>
+                        <td class="border px-2 py-2">
+                            <input type="number" name="quantities[]" value="1"
+                                class="qty-input w-20 border rounded px-2 py-1 text-center"
+                                min="1" max="${item.current_stock}" data-rate="${item.price}">
+                        </td>
+                        <td class="border px-2 py-2">${item.unit.name}</td>
+                        <td class="border px-2 py-2">${item.price}</td>
+                    `;
+                    tbody.appendChild(row);
+                    barcodeInput.value = "";
+                    calculateTotals();
+                })
+                .catch(() => {
+                    alert("Invalid barcode or item not in stock.");
+                });
+        }
+    });
+
+    // Recalculate totals
+    function calculateTotals() {
+        let totalQty = 0;
+        let totalAmount = 0;
+
+        tbody.querySelectorAll(".qty-input").forEach(input => {
+            const qty = parseFloat(input.value) || 0;
+            const rate = parseFloat(input.dataset.rate) || 0;
+            totalQty += qty;
+            totalAmount += qty * rate;
+        });
+
+        totalQtyEl.textContent = totalQty;
+        totalAmountEl.textContent = totalAmount.toFixed(2);
+    }
+
+    // Prevent quantity over stock
+    document.addEventListener("input", function (e) {
+        if (e.target.classList.contains("qty-input")) {
+            const max = parseInt(e.target.max);
+            const val = parseInt(e.target.value);
+            if (val > max) {
+                alert("Cannot exceed stock limit");
+                e.target.value = max;
+            }
+            calculateTotals();
+        }
+    });
+
+    // Show delete button if any row checked
+    document.addEventListener("change", function (e) {
+        if (e.target.classList.contains("rowCheckbox")) {
+            const anyChecked = tbody.querySelectorAll(".rowCheckbox:checked").length > 0;
+            deleteBtn.classList.toggle("hidden", !anyChecked);
+        }
+    });
+
+    // Delete selected rows
+    deleteBtn.addEventListener("click", () => {
+        tbody.querySelectorAll(".rowCheckbox:checked").forEach(cb => {
+            cb.closest("tr").remove();
+        });
+        deleteBtn.classList.add("hidden");
+        calculateTotals();
+    });
+});
+</script>
+@endsection

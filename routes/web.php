@@ -30,12 +30,19 @@ Route::prefix('/inventory')->name('inventory.')->group(function () {
 
 Route::get('/items',[InventoryController::class,"items"])->name('items');
   
-Route::get('/items/show/{item}',[InventoryController::class,"show"])->name('items.show');
-  
+
 Route::get('/items/create',[ItemController::class,"create"])->name('items.create');
   Route::post('/items/store',[ItemController::class,"store"])->name('items.store');
-      Route::delete('/items/delete',[ItemController::class,"delete"])->name('items.delete');
-      
+ Route::delete('/items/delete',[ItemController::class,"delete"])->name('items.delete');
+ Route::get('/items/show/{item}',[ItemController::class,"show"])->name('items.show');
+Route::get('/items/edit/{item}',[ItemController::class,"edit"])->name('items.edit');
+Route::put('/items/update/{item}',[ItemController::class,"update"])->name('items.update');
+
+
+
+
+
+       
 
 Route::get('/categories',[InventoryController::class,"categories"])->name('categories');
 Route::post('/categories/store',[CategoryController::class,'store'])->name('categories.store');
@@ -49,11 +56,12 @@ Route::delete('/categories/destroy/{category}',[CategoryController::class,"destr
 
 Route::prefix('/inwards')->group(function(){
 
-Route::get('/',[InwardController::class,'index'])->name('inwards');
-  Route::get('/create',[InwardController::class,'create'])->name('inwards.create');
-  Route::post('/store',[InwardController::class,'store'])->name('inwards.store');
-  Route::get('/show/{inward}',[InwardController::class,'show'])->name('inwards.show');
-  Route::get('/edit/{inward}',[InwardController::class,'edit'])->name('inwards.edit');
+ Route::get('/',[InwardController::class,'index'])->name('inwards');
+ Route::get('/create',[InwardController::class,'create'])->name('inwards.create');
+ Route::post('/store',[InwardController::class,'store'])->name('inwards.store');
+ Route::get('/show/{inward}',[InwardController::class,'show'])->name('inwards.show');
+ Route::get('/edit/{inward}',[InwardController::class,'edit'])->name('inwards.edit');
+ Route::put('/update/{inward}',[InwardController::class,'update'])->name('inwards.update');
 
 });
 
@@ -62,6 +70,8 @@ Route::get('/',[OutwardController::class,'index'])->name('outwards');
 Route::get('/create',[OutwardController::class,'create'])->name('outwards.create');
 Route::post('/store',[OutwardController::class,'store'])->name('outwards.store');
 Route::get('/show/{outward}',[OutwardController::class,'show'])->name('outwards.show');
+Route::get('/edit/{outward}',[OutwardController::class,'edit'])->name('outwards.edit');
+Route::put('/update/{outward}',[OutwardController::class,'update'])->name('outwards.update');
 
 });
 
@@ -85,7 +95,9 @@ Route::get("/",[MovementController::class,"index"])->name("movements");
 Route::get("/create",[MovementController::class,"create"])->name("movements.create");
 Route::post("/store",[MovementController::class,"store"])->name("movements.store");
 Route::get("/show/{movement}",[MovementController::class,"show"])->name("movements.show");
-      
+Route::get("/edit/{movement}",[MovementController::class,"edit"])->name("movements.edit");
+Route::put("/update/{movement}",[MovementController::class,"update"])->name("movements.update");
+     
 });
 
 });
@@ -98,17 +110,10 @@ Route::post("/logout",[SessionController::class,'destroy'])->name('logout');
 
 
 Route::get('/test', function () {
-    // return response()->json(['message' => 'API is working!']);
     $items = Item::all();
     return view("test",compact('items'));
 });
 
-
-// Route::get('/item-by-barcode/{barcode}', [ItemController::class, 'getByBarcode']);
-// Route::get('/ledger/{ledger}', [ItemController::class, 'getbyledger']);
-
-// Route::get('/ledger/{ledger}', [LedgerController::class, 'search']); // Ledger search API
-// Route::get('/barcode/{barcode}', [ItemController::class, 'searchByBarcode']);
 
 
 Route::get('/ledger/{ledger}', [LedgerController::class, 'search']);
@@ -131,6 +136,3 @@ Route::post('/test/store', [TestController::class, 'store'])->name('test.store')
 
 
 
-// Route::get('/item-by-barcode/{barcode}', [ItemController::class, 'getByBarcode']);
-// Route::get('/items', [\App\Http\Controllers\Api\ItemController::class, 'showByBarcode']); 
-// Route::get('/ledgers', [\App\Http\Controllers\Api\LedgerController::class, 'search']); 

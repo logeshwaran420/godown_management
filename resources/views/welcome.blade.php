@@ -69,35 +69,7 @@
 
 
 
-<input type="text" id="barcode" placeholder="Enter barcode" style="padding: 8px; width: 200px;" />
 
-<div id="item-details" class="box" style="margin-top: 20px;"></div>
-
-<script>
-    document.getElementById('barcode').addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-            let barcode = this.value.trim(); 
-            if (barcode.length > 0) {
-                fetch(`/item-by-barcode/${barcode}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        let box = document.getElementById('item-details');
-
-                        if (data.error) {
-                            box.innerHTML = `<p style="color:red;">${data.error}</p>`;
-                        } else {
-                            box.innerHTML = `
-                                <h3>${data.name}</h3>
-                                <p><strong>Price:</strong> ₹${data.price}</p>
-                                <p><strong>Description:</strong> ${data.description}</p>
-                            `;
-                        }
-                         document.getElementById('barcode').value = '';
-                    });
-            }
-        }
-    });
-</script>
 
 
             @endsection

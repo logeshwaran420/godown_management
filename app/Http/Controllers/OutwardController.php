@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Inventory;
 use App\Models\Item;
 use App\Models\Ledger;
 use App\Models\Outward;
 use App\Models\OutwardDetail;
+use App\Models\Unit;
 use App\Models\Warehouse;
 use DB;
 use Illuminate\Http\Request;
@@ -163,6 +165,21 @@ public function show(Outward $outward){
     return view("outward.show",compact("outward"));
 }
 
+
+public function edit(outward $outward){
+        $ledgers = Ledger::where('type', 'customer')->get();
+   
+
+    return view("outward.edit",compact('outward','ledgers'));
+}
+
+
+
+
+
+
+
+
      public function search($query)
     {
         $ledgers = Ledger::where('type', 'customer')
@@ -192,6 +209,140 @@ public function show(Outward $outward){
     return response()->json($item);
 }
 
+
+
+
+public function update(Request $request, Outward $outward)
+{
+    $warehouseId = session('warehouse_id');
+
+    $validated = $request->validate([
+        'date' => 'required|date',
+        'ledger_id' => 'required|exists:ledgers,id',
+        'item_ids' => 'required|array',
+        'item_ids.*' => 'exists:items,id',
+        'quantities' => 'required|array',
+        'quantities.*' => 'numeric|min:1',
+        'rates' => 'required|array',
+        'rates.*' => 'numeric|min:0',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        // Update Outward main fields
+        $outward->update([
+            'date' => $request->date,
+            'ledger_id' => $request->ledger_id,
+            'total_quantity' => array_sum($request->quantities),
+            'total_amount' => collect($request->quantities)->zip($request->rates)->sum(function ($pair) {
+                return $pair[0] * $pair[1];
+            }),
+        ]);
+
+        $oldDetails = $outward->details()->get()->keyBy('item_id');
+
+        $newItems = [];
+        foreach ($request->item_ids as $index => $itemId) {
+            $newItems[$itemId] = [
+                'quantity' => $request->quantities[$index],
+                'rate' => $request->rates[$index],
+            ];
+        }
+
+        $processedItemIds = [];
+
+        foreach ($newItems as $itemId => $data) {
+            $quantityNew = $data['quantity'];
+            $rateNew = $data['rate'];
+
+            if ($oldDetails->has($itemId)) {
+                $oldDetail = $oldDetails[$itemId];
+                $quantityOld = $oldDetail->quantity;
+
+                $difference = $quantityNew - $quantityOld;
+
+                // Update outward_detail record
+                $oldDetail->update([
+                    'quantity' => $quantityNew,
+                    'price' => $rateNew,
+                    'total_amount' => $quantityNew * $rateNew,
+                ]);
+
+                // Adjust Item current_stock (subtract difference)
+                $item = Item::find($itemId);
+                if ($item && $difference != 0) {
+                    $item->decrement('current_stock', $difference);
+                }
+
+                // Adjust Inventory record stock for this warehouse (subtract difference)
+                $inventory = Inventory::firstOrCreate(
+                    ['item_id' => $itemId, 'warehouse_id' => $warehouseId],
+                    ['current_stock' => 0]
+                );
+                if ($difference != 0) {
+                    $inventory->decrement('current_stock', $difference);
+                }
+
+                $processedItemIds[] = $itemId;
+            } else {
+                // New item detail - subtract quantity from stock
+                OutwardDetail::create([
+                    'outward_id' => $outward->id,
+                    'item_id' => $itemId,
+                    'quantity' => $quantityNew,
+                    'price' => $rateNew,
+                    'total_amount' => $quantityNew * $rateNew,
+                ]);
+
+                // Decrement Item current_stock
+                $item = Item::find($itemId);
+                if ($item) {
+                    $item->decrement('current_stock', $quantityNew);
+                }
+
+                // Decrement Inventory current_stock
+                $inventory = Inventory::firstOrCreate(
+                    ['item_id' => $itemId, 'warehouse_id' => $warehouseId],
+                    ['current_stock' => 0]
+                );
+                $inventory->decrement('current_stock', $quantityNew);
+
+                $processedItemIds[] = $itemId;
+            }
+        }
+
+        $deletedItems = $oldDetails->keys()->diff($processedItemIds);
+        foreach ($deletedItems as $deletedItemId) {
+            $oldDetail = $oldDetails[$deletedItemId];
+            $quantityOld = $oldDetail->quantity;
+
+            // Increment Item current_stock (because outward item removed)
+            $item = Item::find($deletedItemId);
+            if ($item) {
+                $item->increment('current_stock', $quantityOld);
+            }
+
+            // Increment Inventory current_stock
+            $inventory = Inventory::where('item_id', $deletedItemId)
+                ->where('warehouse_id', $warehouseId)
+                ->first();
+
+            if ($inventory) {
+                $inventory->increment('current_stock', $quantityOld);
+            }
+
+            $oldDetail->delete();
+        }
+
+        DB::commit();
+
+        return redirect()->route('outwards.show', compact('outward'))->with('success', 'Outward updated successfully.');
+    } catch (\Exception $e) {
+        DB::rollback();
+        return back()->withErrors(['error' => 'Failed to update outward: ' . $e->getMessage()]);
+    }
+}
 
 
 }

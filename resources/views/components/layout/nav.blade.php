@@ -23,7 +23,7 @@
     </button>
 
     <div x-show="inventory" x-cloak class="ml-4 mt-2 space-y-1">
-        <x-layout.nav-link href="{{ route('inventory.items') }}" :active="request()->routeIs('inventory.items','inventory.items/*')">
+        <x-layout.nav-link href="{{ route('inventory.items') }}" :active="request()->routeIs('inventory.items','inventory.items.show','inventory.items.edit')">
             Items
         </x-layout.nav-link> 
         <x-layout.nav-link href="{{ route('inventory.categories') }}" :active="request()->routeIs('inventory.categories')">
@@ -39,7 +39,7 @@
         </x-layout.nav-link>
 
  <x-layout.nav-link href="{{ route('outwards') }}"
-  :active="request()->routeIs('outwards','outwards.create','outwards.show')">
+  :active="request()->routeIs('outwards','outwards.create','outwards.show','outwards.edit')">
             Outward
         </x-layout.nav-link>
 
@@ -48,7 +48,7 @@
          <x-layout.nav-link href="{{ route('ledgers') }}" :active="request()->routeIs('ledgers')">
             Ledgers
         </x-layout.nav-link> 
-  <x-layout.nav-link href="{{ route('movements') }}" :active="request()->routeIs('movements','movements.create','movements.show')">
+  <x-layout.nav-link href="{{ route('movements') }}" :active="request()->routeIs('movements','movements.create','movements.show','movements.edit')">
        Movement
     </x-layout.nav-link>
 

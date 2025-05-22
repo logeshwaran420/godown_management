@@ -17,7 +17,7 @@ class InventoryController extends Controller
         
     $warehouse = Warehouse::findOrFail($warehouseId);
      $inventories = $warehouse->inventories()->where('current_stock', '>', 0)
-        ->paginate(5);
+        ->paginate(7);
       
         return view("inventory.items.index",compact("inventories"));
     }
@@ -26,12 +26,6 @@ class InventoryController extends Controller
         return view('inventory.categories.index',compact('categories'));
     }
 
-public function show(item $item){
-
-   $categories =  Category::all();
-
-  return view("inventory.items.show",compact('item','categories'));
-}
 
 
     

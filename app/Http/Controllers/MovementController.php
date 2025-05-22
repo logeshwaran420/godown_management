@@ -192,4 +192,135 @@ public function show(movement $movement){
     return view("movement.show",compact('movement'));
 }
 
+
+
+
+public function edit(movement $movement){
+
+
+    
+        $warehouseId = session('warehouse_id'); 
+    $from_warehouse = Warehouse::find($warehouseId);
+    $warehouses = Warehouse::where('id', '!=', $warehouseId)->get();
+
+    
+    return view("movement.edit",compact('movement','from_warehouse','warehouses'));
+}
+
+
+
+public function update(Request $request, Movement $movement)
+{
+    $request->validate([
+        'from_warehouse_id' => 'required|exists:warehouses,id',
+        'to_warehouse_id' => 'required|exists:warehouses,id|different:from_warehouse_id',
+        'date' => 'required|date',
+        'items' => 'required|array',
+    ]);
+
+    DB::transaction(function () use ($request, $movement) {
+
+        // Step 1: Reverse old stock changes before updating
+
+        foreach ($movement->items as $detail) {
+            $itemId = $detail->item_id;
+            $qty = $detail->quantity;
+
+            // Restore stock in source warehouse (increase)
+            $fromInventory = Inventory::where('warehouse_id', $movement->from_warehouse_id)
+                ->where('item_id', $itemId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($fromInventory) {
+                $fromInventory->increment('current_stock', $qty);
+            } else {
+                Inventory::create([
+                    'warehouse_id' => $movement->from_warehouse_id,
+                    'item_id' => $itemId,
+                    'current_stock' => $qty,
+                ]);
+            }
+
+            // Reduce stock in destination warehouse (decrease)
+            $toInventory = Inventory::where('warehouse_id', $movement->to_warehouse_id)
+                ->where('item_id', $itemId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($toInventory) {
+                if ($toInventory->current_stock < $qty) {
+                    throw new \Exception("Cannot reverse stock for item ID {$itemId} in destination warehouse, insufficient stock.");
+                }
+                $toInventory->decrement('current_stock', $qty);
+            } else {
+                // This should not happen normally but just in case:
+                throw new \Exception("Destination inventory record missing for item ID {$itemId}.");
+            }
+        }
+
+        // Step 2: Update main movement record details
+        $movement->update([
+            'from_warehouse_id' => $request->from_warehouse_id,
+            'to_warehouse_id' => $request->to_warehouse_id,
+            'date' => $request->date,
+            'total_quantity' => 0, // will update after processing items
+        ]);
+
+        // Step 3: Delete old movement details
+        $movement->items()->delete();
+
+        // Step 4: Process new items, update stocks and insert details
+        $totalQty = 0;
+
+        foreach ($request->items as $itemId => $data) {
+            $qty = $data['qty'];
+
+            // Lock inventory record in source warehouse for update
+            $fromInventory = Inventory::where('warehouse_id', $request->from_warehouse_id)
+                ->where('item_id', $itemId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$fromInventory || $fromInventory->current_stock < $qty) {
+                throw new \Exception("Not enough stock for item {$data['name']} in source warehouse.");
+            }
+
+            $fromInventory->decrement('current_stock', $qty);
+
+            // Lock or create inventory record in destination warehouse
+            $toInventory = Inventory::where('warehouse_id', $request->to_warehouse_id)
+                ->where('item_id', $itemId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($toInventory) {
+                $toInventory->increment('current_stock', $qty);
+            } else {
+                Inventory::create([
+                    'warehouse_id' => $request->to_warehouse_id,
+                    'item_id' => $itemId,
+                    'current_stock' => $qty,
+                ]);
+            }
+
+            MovementDetail::create([
+                'movement_id' => $movement->id,
+                'item_id' => $itemId,
+                'barcode' => $data['barcode'],
+                'name' => $data['name'],
+                'quantity' => $qty,
+            ]);
+
+            $totalQty += $qty;
+        }
+
+        // Step 5: Update total quantity on movement record
+        $movement->update(['total_quantity' => $totalQty]);
+    });
+
+    return redirect()->route('movements.show',compact('movement'))->with('success', 'Movement updated successfully.');
+}
+
+
 }
