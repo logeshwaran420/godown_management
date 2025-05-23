@@ -5,9 +5,7 @@
     <div class="flex justify-between items-center border-b px-6 py-4">
         <h2 class="text-xl font-semibold">Inwards Entry</h2>
         <button type="button" id="saveBtn"
-            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Save
-        </button>
+            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 border-b gap-4 p-6">
@@ -46,13 +44,20 @@
                     <th class="border px-2 py-2">Qty</th>
                     <th class="border px-2 py-2">Unit</th>
                     <th class="border px-2 py-2">Rate</th>
+                    <th class="border px-2 py-2">Subtotal</th>
                 </tr>
             </thead>
             <tbody id="itemsTableBody" class="text-center">
                 <tr id="noDataRow">
-                    <td class="px-3 py-3" colspan="9">No Data</td>
+                    <td class="px-3 py-3" colspan="10">No Data</td>
                 </tr>
             </tbody>
+            <tfoot class="bg-gray-100 font-semibold">
+                <tr>
+                    <td colspan="9" class="text-right border px-2 py-2">Grand Total</td>
+                    <td id="grandTotal" class="border px-2 py-2 text-right">0.00</td>
+                </tr>
+            </tfoot>
         </table>
         <button type="button" id="deleteSelectedBtn"
             class="mt-4 bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600 hidden">
@@ -80,7 +85,6 @@
 <script>
     let itemCount = 0;
 
-    // Ledger live search
     document.getElementById('ledgerInput').addEventListener('input', function () {
         let query = this.value;
         if (query.length < 2) return;
@@ -91,7 +95,7 @@
                 let list = document.getElementById('ledgerList');
                 list.innerHTML = '';
                 if (data.length === 0) return list.classList.add('hidden');
-
+                
                 data.forEach(ledger => {
                     let li = document.createElement('li');
                     li.textContent = ledger.name;
@@ -101,15 +105,16 @@
                         document.getElementById('ledgerInput').value = ledger.name;
                         document.getElementById('ledgerInput').dataset.id = ledger.id;
                         list.classList.add('hidden');
-                        list.innerHTML = '';
+                        list.innerHTML = '';        
+
                     };
                     list.appendChild(li);
                 });
                 list.classList.remove('hidden');
             });
     });
-
-    // Barcode Entry
+    
+    
     document.getElementById('barcodeInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -132,15 +137,16 @@
                     itemCount++;
                     let row = document.createElement('tr');
                     row.innerHTML = `
-                        <td><input type="checkbox" class="rowCheckbox"></td>
-                        <td>${itemCount}</td>
-                        <td>${item.barcode}</td>
-                        <td>${item.category?.name || '-'}</td>
-                        <td>${item.name}</td>
-                        <td>${item.hsn_code || '-'}</td>
-                        <td><input type="number" value="1" min="1" class="qtyInput w-16 border rounded text-center"></td>
-                        <td>${item.unit?.name || '-'}</td>
-                        <td>${item.price}</td>
+                        <td class="border px-2 py-2"><input type="checkbox" class="rowCheckbox"></td>
+                        <td class="border px-2 py-2">${itemCount}</td>
+                        <td class="border px-2 py-2">${item.barcode}</td>
+                        <td class="border px-2 py-2">${item.category?.name || '-'}</td>
+                        <td class="border px-2 py-2">${item.name}</td>
+                        <td class="border px-2 py-2">${item.hsn_code || '-'}</td>
+                        <td class="border px-2 py-2"><input type="number" value="1" min="1" class="qtyInput w-16 border rounded text-center"></td>
+                        <td class="border px-2 py-2">${item.unit?.name || '-'}</td>
+                        <td class="border px-2 py-2">${item.price}</td>
+                        <td class="border px-2 py-2 text-right">0.00</td>
                     `;
                     row.dataset.itemId = item.id;
                     document.getElementById('itemsTableBody').appendChild(row);
@@ -150,8 +156,7 @@
                 .catch(err => alert(err));
         }
     });
-
-    // Quantity or row change
+    
     document.getElementById('itemsTableBody').addEventListener('input', function (e) {
         if (e.target.classList.contains('qtyInput')) {
             calculateSummary();
@@ -160,7 +165,7 @@
 
     document.getElementById('itemsTableBody').addEventListener('change', toggleDeleteBtn);
 
-    // Delete Rows
+    
     document.getElementById('deleteSelectedBtn').addEventListener('click', function () {
         document.querySelectorAll('.rowCheckbox:checked').forEach(chk => {
             chk.closest('tr').remove();
@@ -168,7 +173,7 @@
         calculateSummary();
         toggleDeleteBtn();
         if (!document.querySelectorAll('#itemsTableBody tr').length) {
-            document.getElementById('itemsTableBody').innerHTML = `<tr id="noDataRow"><td colspan="9" class="text-center py-3">No Data</td></tr>`;
+            document.getElementById('itemsTableBody').innerHTML = `<tr id="noDataRow"><td colspan="10" class="text-center py-3">No Data</td></tr>`;
             itemCount = 0;
         }
     });
@@ -180,20 +185,30 @@
 
     function calculateSummary() {
         let totalQty = 0;
-        let totalPrice = 0;
+        let grandTotal = 0;
+
         document.querySelectorAll('#itemsTableBody tr').forEach(row => {
             const qtyInput = row.querySelector('.qtyInput');
             if (!qtyInput) return;
+
             const qty = parseFloat(qtyInput.value) || 0;
             const rate = parseFloat(row.children[8].textContent.trim()) || 0;
+            const subtotal = qty * rate;
+
             totalQty += qty;
-            totalPrice += qty * rate;
+            grandTotal += subtotal;
+
+            if (row.children[9]) {
+                row.children[9].textContent = subtotal.toFixed(2);
+            }
         });
+
         document.getElementById('totalQty').textContent = totalQty;
-        document.getElementById('totalPrice').textContent = totalPrice.toFixed(2);
+        document.getElementById('totalPrice').textContent = grandTotal.toFixed(2);
+        document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
     }
 
-    // Save Button
+    
     document.getElementById('saveBtn').addEventListener('click', function () {
         const ledgerId = document.getElementById('ledgerInput').dataset.id;
         const date = document.getElementById('formDate').value;
@@ -203,11 +218,13 @@
             return;
         }
 
-        const items = [...document.querySelectorAll('#itemsTableBody tr')].filter(tr => tr.querySelector('.qtyInput')).map(tr => ({
-            item_id: parseInt(tr.dataset.itemId),
-            quantity: parseFloat(tr.querySelector('.qtyInput').value),
-            price: parseFloat(tr.children[8].textContent.trim()),
-        }));
+        const items = [...document.querySelectorAll('#itemsTableBody tr')]
+            .filter(tr => tr.querySelector('.qtyInput'))
+            .map(tr => ({
+                item_id: parseInt(tr.dataset.itemId),
+                quantity: parseFloat(tr.querySelector('.qtyInput').value),
+                price: parseFloat(tr.children[8].textContent.trim()),
+            }));
 
         if (items.length === 0) {
             alert("Please add at least one item");
@@ -230,7 +247,7 @@
         .then(data => {
             if (data.success) {
                 alert(data.message);
-                  window.location.href = "{{ route('inwards') }}";
+                window.location.href = "{{ route('inwards') }}";
             } else {
                 alert("Error: " + data.message);
                 location.reload();
@@ -241,9 +258,11 @@
             console.error(err);
         });
     });
+
+
+
+
+
+
 </script>
 @endsection
-
-
-
-

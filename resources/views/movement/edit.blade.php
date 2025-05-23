@@ -60,6 +60,7 @@
                         <th class="border px-2 py-2">Qty</th>
                         <th class="border px-2 py-2">Unit</th>
                         <th class="border px-2 py-2">Price</th>
+                        <th class="border px-2 py-2">Subtotal</th>
                     </tr>
                 </thead>
                 <tbody id="itemsTableBody" class="text-center">
@@ -73,19 +74,26 @@
                             <td class="border px-2 py-2">{{ $item->name }}</td>
                             <td class="border px-2 py-2">{{ $item->hsn_code }}</td>
                             <td class="border px-2 py-2">
-                                <input type="number" name="items[{{ $item->id }}][qty]" value="{{ $detail->quantity }}" min="1" max="{{ $item->current_stock }}" class="qtyInput border rounded w-16 text-center px-1 py-0.5" data-stock="{{ $item->current_stock }}" required>
+                                <input type="number" name="items[{{ $item->id }}][qty]" value="{{ $detail->quantity }}" min="1" max="{{ $item->current_stock }}" class="qtyInput border rounded w-16 text-center px-1 py-0.5" data-price="{{ $item->price }}" data-stock="{{ $item->current_stock }}" required>
                                 <input type="hidden" name="items[{{ $item->id }}][barcode]" value="{{ $item->barcode }}">
                                 <input type="hidden" name="items[{{ $item->id }}][name]" value="{{ $item->name }}">
                             </td>
                             <td class="border px-2 py-2">{{ $item->unit->name ?? $item->unit }}</td>
                             <td class="border px-2 py-2">{{ number_format($item->price, 2) }}</td>
+                            <td class="border px-2 py-2 subtotal">0.00</td>
                         </tr>
                     @empty
                         <tr id="noDataRow">
-                            <td colspan="9" class="py-4 text-center text-gray-500">No Data</td>
+                            <td colspan="10" class="py-4 text-center text-gray-500">No Data</td>
                         </tr>
                     @endforelse
                 </tbody>
+                <tfoot class="bg-gray-100 font-semibold">
+                    <tr>
+                        <td colspan="9" class="text-right border px-2 py-2">Grand Total</td>
+                        <td id="grandTotal" class="border px-2 py-2 text-right">0.00</td>
+                    </tr>
+                </tfoot>
             </table>
 
             <button type="button" id="deleteSelectedBtn" class="mt-4 bg-red-500 text-white px-3 py-1 text-xs rounded hover:bg-red-600 hidden">
@@ -124,13 +132,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.querySelectorAll('.qtyInput').forEach(input => {
             const qty = parseInt(input.value) || 0;
-            const price = parseFloat(input.closest('tr').querySelector('td:last-child').textContent) || 0;
+            const price = parseFloat(input.dataset.price) || 0;
+            const subtotal = qty * price;
             totalQty += qty;
-            totalAmount += qty * price;
+            totalAmount += subtotal;
+
+            const subtotalCell = input.closest('tr').querySelector('.subtotal');
+            if (subtotalCell) subtotalCell.textContent = subtotal.toFixed(2);
         });
 
         document.getElementById('totalQty').textContent = totalQty;
         document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+        document.getElementById('grandTotal').textContent = totalAmount.toFixed(2);
     }
 
     function updateSlno() {
@@ -179,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
     deleteSelectedBtn.addEventListener('click', function() {
         document.querySelectorAll('.rowCheckbox:checked').forEach(cb => cb.closest('tr').remove());
         if (!itemsTableBody.querySelector('tr')) {
-            itemsTableBody.innerHTML = `<tr id="noDataRow"><td colspan="9" class="py-4 text-center text-gray-500">No Data</td></tr>`;
+            itemsTableBody.innerHTML = `<tr id="noDataRow"><td colspan="10" class="py-4 text-center text-gray-500">No Data</td></tr>`;
         }
         selectAllCheckbox.checked = false;
         deleteSelectedBtn.style.display = 'none';
@@ -230,12 +243,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             <td class="border px-2 py-2">${item.name}</td>
                             <td class="border px-2 py-2">${item.hsn_code || ''}</td>
                             <td class="border px-2 py-2">
-                                <input type="number" name="items[${item.id}][qty]" value="1" min="1" max="${item.current_stock}" class="qtyInput border rounded w-16 text-center px-1 py-0.5" data-stock="${item.current_stock}" required>
+                                <input type="number" name="items[${item.id}][qty]" value="1" min="1" max="${item.current_stock}" class="qtyInput border rounded w-16 text-center px-1 py-0.5" data-price="${item.price}" data-stock="${item.current_stock}" required>
                                 <input type="hidden" name="items[${item.id}][barcode]" value="${item.barcode}">
                                 <input type="hidden" name="items[${item.id}][name]" value="${item.name}">
                             </td>
                             <td class="border px-2 py-2">${item.unit.name || item.unit || ''}</td>
                             <td class="border px-2 py-2">${parseFloat(item.price).toFixed(2)}</td>
+                            <td class="border px-2 py-2 subtotal">0.00</td>
                         </tr>
                     `;
                     itemsTableBody.insertAdjacentHTML('beforeend', row);

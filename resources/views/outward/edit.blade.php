@@ -2,8 +2,6 @@
 
 @section('content')
 
-
-
 <form method="POST" action="{{ route('outwards.update', $outward->id) }}">
     @csrf
     @method('PUT')
@@ -11,7 +9,7 @@
     <div class="w-full mx-auto bg-white px-4 py-6">
 
         <div class="flex justify-between items-center border-b px-6 py-4">
-            <h2 class="text-xl font-semibold">Edit Outward </h2>
+            <h2 class="text-xl font-semibold">Edit Outward</h2>
             <button type="submit" id="saveBtn"
                 class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                 Save
@@ -65,6 +63,7 @@
                             <th class="border px-2 py-2">Qty</th>
                             <th class="border px-2 py-2">Unit</th>
                             <th class="border px-2 py-2">Rate</th>
+                            <th class="border px-2 py-2">Subtotal</th>
                         </tr>
                     </thead>
                     <tbody class="text-center text-black">
@@ -73,42 +72,19 @@
                                 <td><input type="checkbox" class="rowCheckbox"></td>
                                 <td class="border px-2 py-2">{{ $index + 1 }}</td>
                                 <td class="border px-2 py-2">{{ $detail->item->barcode }}</td>
-                                <td class="border px-2 py-2">
-                                    {{ $detail->item->category->name }}
-                                    {{-- <select name="category_ids[]" class="w-full border rounded px-2 py-1">
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}" {{ $category->id == ? 'selected' : '' }}>
-                                                {{ $category->name }}
-                                            </option>
-                                        @endforeach
-                                    </select> --}}
-                                </td>
-                                <td class="border px-2 py-2">
-                                    {{ $detail->item->name }}
-                                    {{-- <input type="text" name="item_names[]" value=""
-                                        class="w-full border rounded px-2 py-1 text-center"> --}}
-                                </td>
-                                <td class="border px-2 py-2">
-                                    {{ $detail->item->hsn_code }}
-                                    {{-- <input type="text" name="hsn_codes[]" value=""
-                                        class="w-full border rounded px-2 py-1 text-center"> --}}
-                                </td>
+                                <td class="border px-2 py-2">{{ $detail->item->category->name }}</td>
+                                <td class="border px-2 py-2">{{ $detail->item->name }}</td>
+                                <td class="border px-2 py-2">{{ $detail->item->hsn_code }}</td>
                                 <td class="border px-2 py-2">
                                     <input type="number" name="quantities[]" value="{{ $detail->quantity }}"
                                         class="w-full border rounded px-2 py-1 text-center qty-input" min="1"
                                         data-rate="{{ $detail->item->price }}">
                                 </td>
-                                <td class="border px-2 py-2">
-                                    {{ $detail->item->unit->abbreviation }}
-                                    {{-- <select name="unit_ids[]" class="w-full border rounded px-2 py-1">
-                                        @foreach ($units as $unit)
-                                            <option value="{{ $unit->id }}" {{ $unit->id ==  ? 'selected' : '' }}>
-                                                {{ $unit->name }}
-                                            </option>
-                                        @endforeach
-                                    </select> --}}
-                                </td>
+                                <td class="border px-2 py-2">{{ $detail->item->unit->abbreviation }}</td>
                                 <td class="border px-2 py-2 rate-cell">{{ $detail->item->price }}</td>
+                                <td class="border px-2 py-2 subtotal-cell">
+                                    {{ number_format($detail->quantity * $detail->item->price, 2) }}
+                                </td>
 
                                 {{-- Hidden inputs for existing items --}}
                                 <td style="display:none;">
@@ -118,6 +94,13 @@
                             </tr>
                         @endforeach
                     </tbody>
+
+                    <tfoot class="bg-gray-100 font-semibold">
+                        <tr>
+                            <td colspan="9" class="text-right border px-2 py-2">Grand Total</td>
+                            <td id="grandTotal" class="border px-2 py-2 text-right">0.00</td>
+                        </tr>
+                    </tfoot>
                 </table>
 
                 <button type="button" id="deleteSelectedBtn"
@@ -157,14 +140,25 @@ document.addEventListener("DOMContentLoaded", function () {
         let totalAmount = 0;
 
         document.querySelectorAll("tbody tr").forEach(row => {
-            const qty = parseFloat(row.querySelector('input[name="quantities[]"]')?.value || 0);
-            const rate = parseFloat(row.querySelector(".rate-cell")?.textContent || 0);
+            const qtyInput = row.querySelector('input[name="quantities[]"]');
+            const rateCell = row.querySelector(".rate-cell");
+            const subtotalCell = row.querySelector(".subtotal-cell");
+
+            if (!qtyInput || !rateCell || !subtotalCell) return;
+
+            const qty = parseFloat(qtyInput.value) || 0;
+            const rate = parseFloat(rateCell.textContent) || 0;
+            const subtotal = qty * rate;
+
             totalQty += qty;
-            totalAmount += qty * rate;
+            totalAmount += subtotal;
+
+            subtotalCell.textContent = subtotal.toFixed(2);
         });
 
         document.querySelector(".total-qty").textContent = totalQty;
         document.querySelector(".total-amount").textContent = totalAmount.toFixed(2);
+        document.getElementById("grandTotal").textContent = totalAmount.toFixed(2);
     }
 
     function toggleDeleteButton() {
@@ -217,65 +211,57 @@ document.addEventListener("DOMContentLoaded", function () {
                             <td class="border px-2 py-2">${item.name}</td>
                             <td class="border px-2 py-2">${item.hsn_code || ''}</td>
                             <td class="border px-2 py-2">
-                                <input type="number" name="quantities[]" value="1"
-                                    class="qty-input w-16 border rounded px-1 py-0.5 text-center" min="1">
-
-                                <input type="hidden" name="item_ids[]" value="${item.id}">
-                                <input type="hidden" name="category_ids[]" value="${item.category_id}">
-                                <input type="hidden" name="unit_ids[]" value="${item.unit_id}">
-                                <input type="hidden" name="hsn_codes[]" value="${item.hsn_code || ''}">
-                                <input type="hidden" name="item_names[]" value="${item.name}">
-                                <input type="hidden" name="rates[]" value="${item.price || 0}">
+                                <input type="number" name="quantities[]" value="1" min="1"
+                                    class="w-full border rounded px-2 py-1 text-center qty-input" data-rate="${item.price}">
                             </td>
-                            <td class="border px-2 py-2">${item.unit?.name || ''}</td>
-                            <td class="border px-2 py-2 rate-cell">${item.price || 0}</td>
+                            <td class="border px-2 py-2">${item.unit?.abbreviation || ''}</td>
+                            <td class="border px-2 py-2 rate-cell">${parseFloat(item.price).toFixed(2)}</td>
+                            <td class="border px-2 py-2 subtotal-cell">0.00</td>
+
+                            <td style="display:none;">
+                                <input type="hidden" name="item_ids[]" value="${item.id}" />
+                                <input type="hidden" name="rates[]" value="${parseFloat(item.price).toFixed(2)}" />
+                            </td>
                         `;
                         tbody.appendChild(tr);
                         bindRowEvents(tr);
+                        calculateTotals();
                     }
-                    calculateTotals();
-                    barcodeInput.value = '';
+
+                    barcodeInput.value = "";
+                    barcodeInput.focus();
                 })
                 .catch(err => {
-                    alert(err.message);
+                    alert("Item not found");
                 });
         }
     });
 
-    deleteBtn.addEventListener("click", function () {
-        document.querySelectorAll(".rowCheckbox:checked").forEach(chk => {
-            chk.closest("tr").remove();
+    deleteBtn.addEventListener("click", () => {
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        rows.forEach(row => {
+            const checkbox = row.querySelector(".rowCheckbox");
+            if (checkbox && checkbox.checked) {
+                row.remove();
+            }
         });
+
+        // Re-number slno column
+        Array.from(tbody.querySelectorAll("tr")).forEach((row, idx) => {
+            row.cells[1].textContent = idx + 1;
+        });
+        slnoCounter = tbody.querySelectorAll("tr").length + 1;
+
         calculateTotals();
         toggleDeleteButton();
     });
 
-    // Bind existing rows events
-    tbody.querySelectorAll("tr").forEach(bindRowEvents);
+    // Initial binding for existing rows
+    document.querySelectorAll("tbody tr").forEach(bindRowEvents);
 
+    // Initial calculation on page load
     calculateTotals();
 });
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 @endsection

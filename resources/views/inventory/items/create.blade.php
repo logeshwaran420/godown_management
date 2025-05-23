@@ -89,14 +89,14 @@
                 @enderror
             </div>
 
-            <div>
+            {{-- <div>
                 <label for="current_stock" class="block text-sm font-medium text-gray-700">Current Stock</label>
                 <input type="number" name="current_stock" id="current_stock" value="{{ old('current_stock', 0) }}"
                     class="mt-1 block w-full border rounded px-3 py-2 @error('current_stock') border-red-500 @enderror" min="0" required>
                 @error('current_stock')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
-            </div>
+            </div> --}}
 
             <div>
                 <label for="image" class="block text-sm font-medium text-gray-700">Image</label>

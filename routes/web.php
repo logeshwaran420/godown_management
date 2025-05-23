@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InwardController;
 use App\Http\Controllers\ItemController;
@@ -22,7 +23,7 @@ Route::get('/', function () {
   return view('welcome');
 })->name('home');
 
-
+Route::get('/',[HomeController::class,"index"])->name('home');
 
 
 
@@ -105,6 +106,7 @@ Route::put("/update/{movement}",[MovementController::class,"update"])->name("mov
 
 
 Route::get("/login",[SessionController::class,'login'])->name('login');
+Route::post("/login/store",[SessionController::class,'store'])->name('login.store');
 Route::post("/logout",[SessionController::class,'destroy'])->name('logout');
 
 
@@ -116,8 +118,8 @@ Route::get('/test', function () {
 
 
 
-Route::get('/ledger/{ledger}', [LedgerController::class, 'search']);
-Route::get('/items/{barcode}', [ItemController::class, 'findByBarcode']);
+// Route::get('/ledger/{ledger}', [LedgerController::class, 'search']);
+// Route::get('/items/{barcode}', [ItemController::class, 'findByBarcode']);
 
 
 
@@ -129,10 +131,6 @@ Route::get('/inward/{barcode}', [InwardController::class, 'findByBarcode']);
 
 Route::get('/outward/{barcode}', [OutwardController::class, 'findByBarcode']);
 Route::get('/customer/{query}', [OutwardController::class, 'search']);
-
-
-Route::get('/test/create', [TestController::class, 'create'])->name('test.create');
-Route::post('/test/store', [TestController::class, 'store'])->name('test.store');
 
 
 

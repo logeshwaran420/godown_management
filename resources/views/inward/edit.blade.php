@@ -26,7 +26,7 @@
                     value="{{ $inward->date }}"
                     max="{{ date('Y-m-d') }}" 
                     required>
-                </div>
+            </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Ledger</label>
                 <select id="ledgerInput" name="ledger_id"
@@ -61,14 +61,15 @@
                             <th class="border px-2 py-2">Qty</th>
                             <th class="border px-2 py-2">Unit</th>
                             <th class="border px-2 py-2">Rate</th>
+                            <th class="border px-2 py-2">Subtotal</th>
                         </tr>
                     </thead>
                     <tbody class="text-center text-black">
                         @foreach ($inward->details as $index => $detail)
                             <tr>
                                 <td><input type="checkbox" class="rowCheckbox"></td>
-                                <td class="border px-2 py-2">{{ $index + 1 }}</td>
-                                <td class="border px-2 py-2">{{ $detail->item->barcode }}</td>
+                                <td class="border px-2 py-2 slno">{{ $index + 1 }}</td>
+                                <td class="border px-2 py-2 barcode-cell">{{ $detail->item->barcode }}</td>
                                 <td class="border px-2 py-2">
                                     <select name="category_ids[]" class="w-full border rounded px-2 py-1">
                                         @foreach ($categories as $category)
@@ -101,8 +102,9 @@
                                     </select>
                                 </td>
                                 <td class="border px-2 py-2 rate-cell">{{ $detail->item->price }}</td>
+                                <td class="border px-2 py-2 subtotal-cell">{{ number_format($detail->quantity * $detail->item->price, 2) }}</td>
 
-                                {{-- Hidden inputs for existing items --}}
+                                {{-- Hidden inputs for existing item IDs and rates --}}
                                 <td style="display:none;">
                                     <input type="hidden" name="item_ids[]" value="{{ $detail->item->id }}">
                                     <input type="hidden" name="rates[]" value="{{ $detail->item->price }}">
@@ -110,6 +112,12 @@
                             </tr>
                         @endforeach
                     </tbody>
+                     <tfoot class="bg-gray-100 font-semibold">
+                <tr>
+                    <td colspan="9" class="text-right border px-2 py-2">Grand Total</td>
+                    <td id="grandTotal" class="border px-2 py-2 text-right">0.00</td>
+                </tr>
+            </tfoot>
                 </table>
 
                 <button type="button" id="deleteSelectedBtn"
@@ -144,19 +152,34 @@ document.addEventListener("DOMContentLoaded", function () {
     const deleteBtn = document.getElementById("deleteSelectedBtn");
     let slnoCounter = {{ $inward->details->count() + 1 }};
 
+    function recalcSlno() {
+        tbody.querySelectorAll("tr").forEach((row, i) => {
+            const slnoCell = row.querySelector(".slno");
+            if(slnoCell) slnoCell.textContent = i + 1;
+        });
+        slnoCounter = tbody.querySelectorAll("tr").length + 1;
+    }
+
     function calculateTotals() {
         let totalQty = 0;
         let totalAmount = 0;
 
-        document.querySelectorAll("tbody tr").forEach(row => {
-            const qty = parseFloat(row.querySelector('input[name="quantities[]"]')?.value || 0);
+        tbody.querySelectorAll("tr").forEach(row => {
+            const qtyInput = row.querySelector('input[name="quantities[]"]');
+            const qty = parseFloat(qtyInput?.value || 0);
             const rate = parseFloat(row.querySelector(".rate-cell")?.textContent || 0);
+            const subtotalCell = row.querySelector(".subtotal-cell");
+
+            const subtotal = qty * rate;
+            if(subtotalCell) subtotalCell.textContent = subtotal.toFixed(2);
+
             totalQty += qty;
-            totalAmount += qty * rate;
+            totalAmount += subtotal;
         });
 
         document.querySelector(".total-qty").textContent = totalQty;
         document.querySelector(".total-amount").textContent = totalAmount.toFixed(2);
+        document.getElementById("grandTotal").textContent = totalAmount.toFixed(2);
     }
 
     function toggleDeleteButton() {
@@ -169,7 +192,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const checkbox = row.querySelector('.rowCheckbox');
 
         if (qtyInput) {
-            qtyInput.addEventListener("input", calculateTotals);
+            qtyInput.addEventListener("input", () => {
+                calculateTotals();
+            });
         }
 
         if (checkbox) {
@@ -191,44 +216,56 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                 .then(item => {
                     const existingRow = Array.from(tbody.querySelectorAll("tr")).find(row => {
-                        return row.cells[2]?.textContent.trim() === item.barcode;
+                        return row.querySelector(".barcode-cell")?.textContent.trim() === item.barcode;
                     });
 
                     if (existingRow) {
                         const qtyInput = existingRow.querySelector('input[name="quantities[]"]');
                         qtyInput.value = parseInt(qtyInput.value) + 1;
-                        existingRow.classList.add('bg-yellow-100');
-                        setTimeout(() => existingRow.classList.remove('bg-yellow-100'), 500);
+                        // existingRow.classList.add('bg-yellow-100');
+                        // setTimeout(() => existingRow.classList.remove('bg-yellow-100'), 500);
+                        calculateTotals();
                     } else {
                         const tr = document.createElement("tr");
+
                         tr.innerHTML = `
                             <td><input type="checkbox" class="rowCheckbox" /></td>
-                            <td class="border px-2 py-2">${slnoCounter++}</td>
-                            <td class="border px-2 py-2">${item.barcode}</td>
-                            <td class="border px-2 py-2">${item.category?.name || ''}</td>
-                            <td class="border px-2 py-2">${item.name}</td>
-                            <td class="border px-2 py-2">${item.hsn_code || ''}</td>
+                            <td class="border px-2 py-2 slno">${slnoCounter++}</td>
+                            <td class="border px-2 py-2 barcode-cell">${item.barcode}</td>
                             <td class="border px-2 py-2">
-                                <input type="number" name="quantities[]" value="1"
-                                    class="qty-input w-16 border rounded px-1 py-0.5 text-center" min="1">
-
+                                <select name="category_ids[]" class="w-full border rounded px-2 py-1">
+                                    ${item.category ? `<option value="${item.category.id}" selected>${item.category.name}</option>` : '<option value="">Select</option>'}
+                                </select>
+                            </td>
+                            <td class="border px-2 py-2">
+                                <input type="text" name="item_names[]" value="${item.name}" class="w-full border rounded px-2 py-1 text-center" />
+                            </td>
+                            <td class="border px-2 py-2">
+                                <input type="text" name="hsn_codes[]" value="${item.hsn_code || ''}" class="w-full border rounded px-2 py-1 text-center" />
+                            </td>
+                            <td class="border px-2 py-2">
+                                <input type="number" name="quantities[]" value="1" class="w-full border rounded px-2 py-1 text-center qty-input" min="1" data-rate="${item.price || 0}" />
+                            </td>
+                            <td class="border px-2 py-2">
+                                <select name="unit_ids[]" class="w-full border rounded px-2 py-1">
+                                    ${item.unit ? `<option value="${item.unit.id}" selected>${item.unit.name}</option>` : '<option value="">Select</option>'}
+                                </select>
+                            </td>
+                            <td class="border px-2 py-2 rate-cell">${item.price || 0}</td>
+                            <td class="border px-2 py-2 subtotal-cell">0.00</td>
+                            <td style="display:none;">
                                 <input type="hidden" name="item_ids[]" value="${item.id}">
-                                <input type="hidden" name="category_ids[]" value="${item.category_id}">
-                                <input type="hidden" name="unit_ids[]" value="${item.unit_id}">
-                                <input type="hidden" name="hsn_codes[]" value="${item.hsn_code || ''}">
-                                <input type="hidden" name="item_names[]" value="${item.name}">
                                 <input type="hidden" name="rates[]" value="${item.price || 0}">
                             </td>
-                            <td class="border px-2 py-2">${item.unit?.name || ''}</td>
-                            <td class="border px-2 py-2 rate-cell">${item.price || 0}</td>
                         `;
+
                         tbody.appendChild(tr);
                         bindRowEvents(tr);
+                        calculateTotals();
                     }
 
                     barcodeInput.value = '';
                     barcodeInput.focus();
-                    calculateTotals();
                 })
                 .catch(err => {
                     alert(err.message || "Failed to fetch item");
@@ -242,6 +279,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         deleteBtn.classList.add("hidden");
+        recalcSlno();
         calculateTotals();
     });
 

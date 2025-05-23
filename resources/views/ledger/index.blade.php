@@ -44,9 +44,11 @@
                 @endforeach
             </tbody>
         </table>
-        <div class="mt-4">
+     
+    {{-- @dd($ledgers->filter(fn($ledger) => $ledger->type == "customer")); --}}
+ {{-- <div class="mt-4">
             {{ $ledgers->links() }}
-        </div>
+        </div> --}}
     </div>
 </div>
 

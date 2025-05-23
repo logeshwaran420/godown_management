@@ -52,16 +52,23 @@
                         <th class="border px-2 py-2">Qty</th>
                         <th class="border px-2 py-2">Unit</th>
                         <th class="border px-2 py-2">Price</th>
+                        <th class="border px-2 py-2 text-right">Subtotal</th>
                     </tr>
                 </thead>
                 <tbody id="itemsTableBody" class="text-center">
                     <tr id="noDataRow">
-                        <td class="px-3 py-3" colspan="9">No Data</td>
+                        <td class="px-3 py-3" colspan="10">No Data</td>
                     </tr>
                 </tbody>
+                <tfoot class="bg-gray-100 font-semibold">
+                    <tr>
+                        <td colspan="9" class="text-right border px-2 py-2">Grand Total</td>
+                        <td id="grandTotal" class="border px-2 py-2 text-right">0.00</td>
+                    </tr>
+                </tfoot>
             </table>
             <button type="button" id="deleteSelectedBtn" class="mt-4 bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600 hidden">
-                Delete Selected
+                Delete
             </button>
         </div>
 
@@ -91,7 +98,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const deleteBtn = document.getElementById('deleteSelectedBtn');
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
 
-    // Handle barcode input enter key press
     barcodeInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -113,15 +119,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         if (currentQty < maxStock) {
                             qtyInput.value = currentQty + 1;
+                            updateRowSubtotal(existingRow);
                         } else {
                             alert(`Cannot exceed available stock (${maxStock})`);
                         }
                     } else {
                         document.getElementById('noDataRow')?.remove();
 
-                        const rowCount = tableBody.rows.length + 1;
+                        const rowCount = tableBody.querySelectorAll('tr').length + 1;
 
-                        // Create new row
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td class="border px-2 py-2 text-center">
@@ -146,8 +152,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             </td>
                             <td class="border px-2 py-2">${item.unit.name || item.unit}</td>
                             <td class="border px-2 py-2">${parseFloat(item.price).toFixed(2)}</td>
+                            <td class="border px-2 py-2 text-right">0.00</td>
                         `;
+
                         tableBody.appendChild(tr);
+                        updateRowSubtotal(tr);
+                        updateSlNo();
                     }
                     updateSummary();
                     barcodeInput.value = '';
@@ -163,7 +173,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Update summary on quantity change
     tableBody.addEventListener('input', function (e) {
         if (e.target.classList.contains('qtyInput')) {
             const maxStock = parseInt(e.target.dataset.stock, 10) || 0;
@@ -174,6 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (val < 1) {
                 e.target.value = 1;
             }
+            updateRowSubtotal(e.target.closest('tr'));
             updateSummary();
         }
     });
@@ -183,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tableBody.querySelectorAll('.rowCheckbox:checked').forEach(cb => cb.closest('tr').remove());
 
         if (tableBody.rows.length === 0) {
-            tableBody.innerHTML = '<tr id="noDataRow"><td class="px-3 py-3" colspan="9">No Data</td></tr>';
+            tableBody.innerHTML = '<tr id="noDataRow"><td class="px-3 py-3" colspan="10">No Data</td></tr>';
         }
         deleteBtn.style.display = 'none';
         updateSlNo();
@@ -194,22 +204,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // Show/hide delete button based on checkbox selection
     tableBody.addEventListener('change', function (e) {
         if (e.target.classList.contains('rowCheckbox')) {
-            deleteBtn.style.display = tableBody.querySelector('.rowCheckbox:checked') ? 'inline-block' : 'none';
+            const anyChecked = tableBody.querySelector('.rowCheckbox:checked') !== null;
+            deleteBtn.style.display = anyChecked ? 'inline-block' : 'none';
 
-            // Update "Select All" checkbox state
             const allChecked = tableBody.querySelectorAll('.rowCheckbox').length === tableBody.querySelectorAll('.rowCheckbox:checked').length;
             selectAllCheckbox.checked = allChecked;
         }
     });
 
-    // Select/deselect all rows
     selectAllCheckbox.addEventListener('change', function () {
         const checkboxes = tableBody.querySelectorAll('.rowCheckbox');
         checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
         deleteBtn.style.display = selectAllCheckbox.checked ? 'inline-block' : 'none';
     });
 
-    // Update total quantity and amount
     function updateSummary() {
         let totalQty = 0;
         let totalAmount = 0;
@@ -223,17 +231,31 @@ document.addEventListener('DOMContentLoaded', function () {
             const qty = parseInt(qtyInput.value, 10) || 0;
             totalQty += qty;
 
-            // Assuming price is in last cell
-            const priceCell = row.cells[row.cells.length - 1];
+            // Price is in the 9th cell (index 8)
+            const priceCell = row.cells[8];
             const price = parseFloat(priceCell.textContent) || 0;
+
             totalAmount += price * qty;
+
+            // Update Subtotal cell (last cell)
+            const subtotalCell = row.cells[9];
+            subtotalCell.textContent = (price * qty).toFixed(2);
         });
 
         document.getElementById('totalQty').textContent = totalQty;
         document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+        document.getElementById('grandTotal').textContent = totalAmount.toFixed(2);
     }
 
-    // Update Slno after row deletion
+    function updateRowSubtotal(row) {
+        if (!row) return;
+        const qtyInput = row.querySelector('.qtyInput');
+        if (!qtyInput) return;
+        const qty = parseInt(qtyInput.value, 10) || 0;
+        const price = parseFloat(row.cells[8].textContent) || 0;
+        row.cells[9].textContent = (price * qty).toFixed(2);
+    }
+
     function updateSlNo() {
         let count = 1;
         tableBody.querySelectorAll('tr').forEach(row => {

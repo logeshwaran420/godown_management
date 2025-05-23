@@ -63,12 +63,12 @@
                        class="mt-1 block w-full border rounded px-3 py-2">
             </div>
 
-            <!-- Current Stock -->
+            {{-- <!-- Current Stock -->
             <div>
                 <label class="block text-sm font-medium text-gray-700">Current Stock</label>
                 <input type="number" name="current_stock" value="{{ old('current_stock', $item->current_stock) }}"
                        class="mt-1 block w-full border rounded px-3 py-2">
-            </div>
+            </div> --}}
 
             <!-- HSN Code -->
             <div>

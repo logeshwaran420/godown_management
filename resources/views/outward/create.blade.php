@@ -2,13 +2,15 @@
 @section('content')
 
 <div class="w-full mx-auto bg-white px-4 py-6 max-w-7xl">
-<div class="flex justify-between items-center border-b px-6 py-4">
+    <div class="flex justify-between items-center border-b px-6 py-4">
         <h2 class="text-xl font-semibold">Outwards Entry</h2>
         <button type="button" id="saveBtn"
-            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            disabled>
             Save
         </button>
     </div>
+
     <div class="grid grid-cols-1 md:grid-cols-4 border-b gap-4 p-6">
         <div>
             <label for="formDate" class="block text-sm font-medium text-gray-700">Date</label>
@@ -30,7 +32,6 @@
         </div>
     </div>
 
-
     <div class="px-6 py-2 pb-6">
         <h3 class="font-semibold text-lg mb-4">Outward Item Details</h3>
         <table class="w-full border text-sm table-fixed">
@@ -45,13 +46,21 @@
                     <th class="border px-2 py-2 w-20">Qty</th>
                     <th class="border px-2 py-2 w-20">Unit</th>
                     <th class="border px-2 py-2 w-20">Rate</th>
+                    <th class="border px-2 py-2 w-20">Subtotal</th>
                 </tr>
             </thead>
             <tbody id="itemsTableBody" class="text-center">
                 <tr id="noDataRow">
-                    <td class="px-3 py-3" colspan="9">No Data</td>
+                    <td class="px-3 py-3" colspan="10">No Data</td>
                 </tr>
             </tbody>
+
+            <tfoot class="bg-gray-100 font-semibold">
+                <tr>
+                    <td colspan="9" class="text-right border px-2 py-2">Grand Total</td>
+                    <td id="grandTotal" class="border px-2 py-2 text-right">0.00</td>
+                </tr>
+            </tfoot>
         </table>
 
         <button type="button" id="deleteSelectedBtn"
@@ -77,7 +86,6 @@
             </table>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -95,21 +103,23 @@ document.addEventListener('DOMContentLoaded', function () {
     let items = [];
     let selectedLedgerId = null;
 
-
     ledgerInput.addEventListener('input', function () {
         const query = this.value.trim();
         if (query.length < 2) {
             ledgerList.classList.add('hidden');
+            selectedLedgerId = null;
+            checkEnableSave();
             return;
         }
 
         fetch(`/customer/${query}`)
             .then(response => response.json())
-
             .then(data => {
                 ledgerList.innerHTML = '';
                 if (data.length === 0) {
                     ledgerList.classList.add('hidden');
+                    selectedLedgerId = null;
+                    checkEnableSave();
                     return;
                 }
 
@@ -127,11 +137,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 ledgerList.classList.remove('hidden');
+            })
+            .catch(() => {
+                ledgerList.classList.add('hidden');
+                selectedLedgerId = null;
+                checkEnableSave();
             });
     });
 
-   
-   
     document.addEventListener('click', function (e) {
         if (!ledgerInput.contains(e.target) && !ledgerList.contains(e.target)) {
             ledgerList.classList.add('hidden');
@@ -147,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch(`/outward/${barcode}`)
                 .then(res => {
                     if (!res.ok) throw new Error('Item not found');
-                   return res.json();
+                    return res.json();
                 })
                 .then(data => {
                     if (!data.current_stock || data.current_stock <= 0) {
@@ -182,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateTable() {
         itemsTableBody.innerHTML = '';
         if (items.length === 0) {
-            itemsTableBody.innerHTML = `<tr id="noDataRow"><td class="px-3 py-3" colspan="9">No Data</td></tr>`;
+            itemsTableBody.innerHTML = `<tr id="noDataRow"><td class="px-3 py-3" colspan="10">No Data</td></tr>`;
             saveBtn.disabled = true;
             deleteSelectedBtn.classList.add('hidden');
             selectAllCheckbox.checked = false;
@@ -191,6 +204,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         items.forEach((item, index) => {
             item.entered_qty = item.entered_qty || 1;
+
+            const subtotal = (item.entered_qty * (item.price || 0)).toFixed(2);
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -206,6 +221,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </td>
                 <td class="border px-2 py-2">${item.unit?.name || '-'}</td>
                 <td class="border px-2 py-2">${item.price || 0}</td>
+                <td class="border px-2 py-2">${subtotal}</td>
             `;
             itemsTableBody.appendChild(tr);
         });
@@ -220,6 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.value = value;
                 items[index].entered_qty = value;
                 calculateTotals();
+                updateTable(); // update subtotal
                 checkEnableSave();
             });
         });
@@ -246,6 +263,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         totalQty.textContent = totalQtyVal;
         totalPrice.textContent = totalPriceVal.toFixed(2);
+
+        document.getElementById('grandTotal').textContent = totalPriceVal.toFixed(2);
     }
 
     function toggleDeleteButton() {
@@ -255,6 +274,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     deleteSelectedBtn.addEventListener('click', function () {
         const checkedBoxes = Array.from(document.querySelectorAll('.rowCheckbox:checked'));
+        // Remove from end to avoid index shifting issues
         checkedBoxes.sort((a, b) => b.dataset.index - a.dataset.index).forEach(chk => {
             items.splice(chk.dataset.index, 1);
         });
@@ -294,36 +314,52 @@ document.addEventListener('DOMContentLoaded', function () {
         const data = {
             date: document.getElementById('formDate').value,
             ledger_id: selectedLedgerId,
-            warehouse_id: 1,
+            warehouse_id: 1, // adjust if dynamic
             invoice_no: '',
             items: items.map(item => ({
-                item_id: item.id,
-                quantity: item.entered_qty,
-                price: item.price,
-            })),
+                barcode: item.barcode,
+                category_id: item.category?.id || null,
+                name: item.name,
+                hsn_code: item.hsn_code || null,
+                entered_qty: item.entered_qty,
+                unit_id: item.unit?.id || null,
+                price: item.price || 0,
+            }))
         };
 
-        fetch('{{ route("outwards.store") }}', {
+        saveBtn.disabled = true;
+        fetch('/outward', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(data)
         })
-        .then(res => res.json())
-        .then(resp => {
-            if (resp.success) {
-    alert('Outward entry saved successfully!');
-    console.log('Redirecting to: {{ route("outwards") }}');
-    window.location.href = "{{ route('outwards') }}";
-}
- else {
-                alert('Error saving data: ' + resp.message);
-            }
-        })
-        .catch(err => alert('Error saving data: ' + err.message));
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to save');
+                return res.json();
+            })
+            .then(resp => {
+                alert('Outward entry saved successfully.');
+                // reset all fields
+                items = [];
+                selectedLedgerId = null;
+                ledgerInput.value = '';
+                barcodeInput.value = '';
+                updateTable();
+                checkEnableSave();
+            })
+            .catch(() => {
+                alert('Error saving data.');
+            })
+            .finally(() => {
+                saveBtn.disabled = false;
+            });
     });
+
+    // Initial table update
+    updateTable();
 });
 </script>
 
