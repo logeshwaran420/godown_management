@@ -1,92 +1,141 @@
 @extends('layouts.app')
 
-
 @section('content')
-
-<div class="container mx-auto px-4 py-6">
-    <div class="flex justify-between items-center py-3 px-3">
-        <h1 class="text-xl font-semibold">Movements</h1> 
-   
-        <a href="{{ route('movements.create') }}" id="open-modal" class="bg-blue-600 text-white px-3 py-1 rounded">+ New</a>
+<div class="container mx-auto px-4 py-8">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+        <div class="mb-4 md:mb-0">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Items Movements</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Track all inventory transfers between warehouses</p>
+        </div>
+        <a href="{{ route('movements.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            <span>Movement</span>
+        </a>
     </div>
 
+    <!-- Table Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Date
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            From Warehouse
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            To Warehouse
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            Items Quantity
+                        </th>
+                     
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    @foreach ($movements as $movement)
+                    <tr 
+                        class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 cursor-pointer"
+                        onclick="window.location='{{ route('movements.show', $movement->id) }}'"
+                    >
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ \Carbon\Carbon::parse($movement->date)->format('M d, Y') }}
+                            </div>
+                            {{-- <div class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ \Carbon\Carbon::parse($movement->date)->diffForHumans() }}
+                            </div> --}}
+                                
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-5 w-5 text-red-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-2">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ $movement->fromWarehouse->name }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-5 w-5 text-green-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-2">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ $movement->toWarehouse->name }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            @php
+                                $unitTotals = [];
+                            @endphp
+                            @foreach($movement->items as $detail)
+                                @php
+                                    $unit = $detail->item->unit;
+                                    $unitId = $unit->id;
+                                    $unitName = $unit->abbreviation;
+                                    $quantity = $detail->quantity;
 
-    <div class="relative overflow-x-auto">    
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr class="sticky top-0 bg-gray-50 dark:bg-gray-700 z-10">
-                    <th scope="col" class="px-6 py-3">
-                      Date
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                       From Warehouse
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        To Warehouse
-                    </th>
-                    
-                    <th scope="col" class="px-6 py-3">
-                        quantity
-                    </th>
-                </tr>
-            </thead>
+                                    if (!isset($unitTotals[$unitId])) {
+                                        $unitTotals[$unitId] = [
+                                            'name' => $unitName,
+                                            'qty' => 0
+                                        ];
+                                    }
 
-               
-           <tbody>
-    @foreach ($movements as $movement)
-    <tr 
-        class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
-        onclick="window.location='{{ route('movements.show', $movement->id) }}'"
-    >
-        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-            {{ $movement->date }}
-        </th>
-        <td class="px-6 py-4">
-            {{ $movement->fromWarehouse->name }}
-        </td>
-        <td class="px-6 py-4">
-            {{ $movement->toWarehouse->name }}
-        </td>
-        <td class="px-6 py-4">
-            {{ $movement->total_quantity }}
-        </td>
-    </tr>
-    @endforeach
-</tbody>
+                                    $unitTotals[$unitId]['qty'] += $quantity;
+                                @endphp
+                            @endforeach
 
-        </table>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($unitTotals as $unit)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    {{ $unit['qty'] }} {{ $unit['name'] }}
+                                </span>
+                                @endforeach
+                            </div>
+                        </td>
+                     
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
-        <!-- Pagination Links -->
-        <div class="mt-4">
-            {{ $movements->links() }}
+        <!-- Pagination -->
+        <div class="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700 dark:text-gray-300">
+                        Showing
+                        <span class="font-medium">{{ $movements->firstItem() }}</span>
+                        to
+                        <span class="font-medium">{{ $movements->lastItem() }}</span>
+                        of
+                        <span class="font-medium">{{ $movements->total() }}</span>
+                        results
+                    </p>
+                </div>
+                <div>
+                    {{ $movements->links() }}
+                </div>
+            </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
 @endsection

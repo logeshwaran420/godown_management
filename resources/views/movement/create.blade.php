@@ -4,28 +4,40 @@
 <div class="w-full mx-auto bg-white px-4 py-6">
     <form id="movementForm" method="POST" action="{{ route('movements.store') }}">
         @csrf
+
+        {{-- Header: Title and Save Button --}}
         <div class="flex justify-between items-center border-b px-6 py-4">
-            <h2 class="text-xl font-semibold">Item Movement</h2>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+            <h2 class="text-xl font-semibold">Movement Entry</h2>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Save
+            </button>
         </div>
 
+        {{-- Inputs Grid --}}
         <div class="grid grid-cols-1 md:grid-cols-2 border-b gap-4 p-6 w-full">
+            {{-- From Warehouse (readonly) --}}
             <div class="w-full">
                 <label class="block text-sm font-medium text-gray-700">From</label>
-                <input type="text" value="{{ $from_warehouse->name }}" readonly class="mt-1 block w-full border rounded px-3 py-2 cursor-not-allowed">
+                <input type="text" value="{{ $from_warehouse->name }}" readonly
+                       class="mt-1 block w-full border rounded px-3 py-2 cursor-not-allowed">
                 <input type="hidden" name="from_warehouse_id" value="{{ $from_warehouse->id }}">
             </div>
 
+            {{-- Date --}}
             <div class="w-full">
                 <label class="block text-sm font-medium text-gray-700">Date</label>
-                <input type="date" name="date" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" class="mt-1 block w-full border rounded px-3 py-2" required>
+                <input type="date" name="date" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}"
+                       class="mt-1 block w-full border rounded px-3 py-2" required>
             </div>
 
+            {{-- Barcode Input --}}
             <div class="w-full">
                 <label class="block text-sm font-medium text-gray-700">Barcode</label>
-                <input type="text" id="barcodeInput" placeholder="Enter Barcode" class="mt-1 block w-full border rounded px-3 py-2" autocomplete="off">
+                <input type="text" id="barcodeInput" placeholder="Enter Barcode"
+                       class="mt-1 block w-full border rounded px-3 py-2" autocomplete="off">
             </div>
 
+            {{-- To Warehouse Dropdown --}}
             <div class="w-full">
                 <label class="block text-sm font-medium text-gray-700">To</label>
                 <select name="to_warehouse_id" class="mt-1 block w-full border rounded px-3 py-2 bg-white" required>
@@ -37,7 +49,7 @@
             </div>
         </div>
 
-        <!-- Table -->
+        {{-- Movement Items Table --}}
         <div class="px-6 py-2 pb-6">
             <h3 class="font-semibold text-lg mb-4">Movement Item Details</h3>
             <table class="w-full border text-sm">
@@ -67,11 +79,15 @@
                     </tr>
                 </tfoot>
             </table>
-            <button type="button" id="deleteSelectedBtn" class="mt-4 bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600 hidden">
+
+            {{-- Delete Selected Button --}}
+            <button type="button" id="deleteSelectedBtn"
+                    class="mt-4 bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600 hidden">
                 Delete
             </button>
         </div>
 
+        {{-- Summary Section --}}
         <div class="mt-6 border-t px-6 py-4">
             <h3 class="font-semibold mb-2">Summary</h3>
             <div class="overflow-x-auto">
@@ -90,6 +106,7 @@
     </form>
 </div>
 
+{{-- JavaScript for dynamic row adding, updating totals, deleting --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('movementForm');
@@ -98,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const deleteBtn = document.getElementById('deleteSelectedBtn');
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
 
+    // Add item on Enter barcode input
     barcodeInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -124,6 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             alert(`Cannot exceed available stock (${maxStock})`);
                         }
                     } else {
+                        // Remove No Data row if present
                         document.getElementById('noDataRow')?.remove();
 
                         const rowCount = tableBody.querySelectorAll('tr').length + 1;
@@ -173,73 +192,100 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Quantity input validation and update subtotal & summary
     tableBody.addEventListener('input', function (e) {
         if (e.target.classList.contains('qtyInput')) {
-            const maxStock = parseInt(e.target.dataset.stock, 10) || 0;
-            let val = parseInt(e.target.value, 10) || 0;
-            if (val > maxStock) {
-                alert(`Quantity cannot exceed available stock (${maxStock})`);
-                e.target.value = maxStock;
-            } else if (val < 1) {
-                e.target.value = 1;
+            const input = e.target;
+            const maxStock = parseInt(input.dataset.stock, 10);
+            let val = parseInt(input.value, 10);
+
+            if (isNaN(val) || val < 1) {
+                input.value = 1;
+                val = 1;
+            } else if (val > maxStock) {
+                alert(`Cannot exceed available stock (${maxStock})`);
+                input.value = maxStock;
+                val = maxStock;
             }
-            updateRowSubtotal(e.target.closest('tr'));
+
+            const row = input.closest('tr');
+            updateRowSubtotal(row);
             updateSummary();
         }
     });
 
-    // Delete selected rows
-    deleteBtn.addEventListener('click', () => {
-        tableBody.querySelectorAll('.rowCheckbox:checked').forEach(cb => cb.closest('tr').remove());
-
-        if (tableBody.rows.length === 0) {
-            tableBody.innerHTML = '<tr id="noDataRow"><td class="px-3 py-3" colspan="10">No Data</td></tr>';
-        }
-        deleteBtn.style.display = 'none';
-        updateSlNo();
-        updateSummary();
-        selectAllCheckbox.checked = false;
+    // Select/Deselect all rows
+    selectAllCheckbox.addEventListener('change', function () {
+        const checked = this.checked;
+        tableBody.querySelectorAll('.rowCheckbox').forEach(cb => cb.checked = checked);
+        toggleDeleteButton();
     });
 
-    // Show/hide delete button based on checkbox selection
+    // Show/hide Delete button on checkbox change
     tableBody.addEventListener('change', function (e) {
         if (e.target.classList.contains('rowCheckbox')) {
-            const anyChecked = tableBody.querySelector('.rowCheckbox:checked') !== null;
-            deleteBtn.style.display = anyChecked ? 'inline-block' : 'none';
-
-            const allChecked = tableBody.querySelectorAll('.rowCheckbox').length === tableBody.querySelectorAll('.rowCheckbox:checked').length;
-            selectAllCheckbox.checked = allChecked;
+            toggleDeleteButton();
         }
     });
 
-    selectAllCheckbox.addEventListener('change', function () {
-        const checkboxes = tableBody.querySelectorAll('.rowCheckbox');
-        checkboxes.forEach(cb => cb.checked = selectAllCheckbox.checked);
-        deleteBtn.style.display = selectAllCheckbox.checked ? 'inline-block' : 'none';
+    // Delete selected rows
+    deleteBtn.addEventListener('click', function () {
+        const checkedBoxes = tableBody.querySelectorAll('.rowCheckbox:checked');
+        if (checkedBoxes.length === 0) {
+            alert('Select at least one row to delete.');
+            return;
+        }
+
+        checkedBoxes.forEach(cb => cb.closest('tr').remove());
+
+        // If no rows left, show No Data row
+        if (tableBody.rows.length === 0) {
+            const noDataRow = document.createElement('tr');
+            noDataRow.id = 'noDataRow';
+            noDataRow.innerHTML = `<td class="px-3 py-3" colspan="10">No Data</td>`;
+            tableBody.appendChild(noDataRow);
+        }
+
+        updateSlNo();
+        updateSummary();
+        toggleDeleteButton();
     });
 
+    // Update row slno
+    function updateSlNo() {
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach((row, idx) => {
+            const slnoCell = row.cells[1];
+            if (slnoCell) slnoCell.textContent = idx + 1;
+        });
+    }
+
+    // Update subtotal for a given row
+    function updateRowSubtotal(row) {
+        const qtyInput = row.querySelector('.qtyInput');
+        const priceCell = row.cells[8];
+        const subtotalCell = row.cells[9];
+
+        const qty = parseInt(qtyInput.value) || 0;
+        const price = parseFloat(priceCell.textContent) || 0;
+        const subtotal = qty * price;
+
+        subtotalCell.textContent = subtotal.toFixed(2);
+    }
+
+    // Update summary totals
     function updateSummary() {
         let totalQty = 0;
         let totalAmount = 0;
 
         tableBody.querySelectorAll('tr').forEach(row => {
-            if (row.id === 'noDataRow') return;
-
             const qtyInput = row.querySelector('.qtyInput');
-            if (!qtyInput) return;
-
-            const qty = parseInt(qtyInput.value, 10) || 0;
-            totalQty += qty;
-
-            // Price is in the 9th cell (index 8)
-            const priceCell = row.cells[8];
-            const price = parseFloat(priceCell.textContent) || 0;
-
-            totalAmount += price * qty;
-
-            // Update Subtotal cell (last cell)
             const subtotalCell = row.cells[9];
-            subtotalCell.textContent = (price * qty).toFixed(2);
+
+            if (qtyInput && subtotalCell) {
+                totalQty += parseInt(qtyInput.value) || 0;
+                totalAmount += parseFloat(subtotalCell.textContent) || 0;
+            }
         });
 
         document.getElementById('totalQty').textContent = totalQty;
@@ -247,22 +293,20 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('grandTotal').textContent = totalAmount.toFixed(2);
     }
 
-    function updateRowSubtotal(row) {
-        if (!row) return;
-        const qtyInput = row.querySelector('.qtyInput');
-        if (!qtyInput) return;
-        const qty = parseInt(qtyInput.value, 10) || 0;
-        const price = parseFloat(row.cells[8].textContent) || 0;
-        row.cells[9].textContent = (price * qty).toFixed(2);
+    // Toggle visibility of Delete button
+    function toggleDeleteButton() {
+        const anyChecked = Array.from(tableBody.querySelectorAll('.rowCheckbox')).some(cb => cb.checked);
+        deleteBtn.style.display = anyChecked ? 'inline-block' : 'none';
     }
 
-    function updateSlNo() {
-        let count = 1;
-        tableBody.querySelectorAll('tr').forEach(row => {
-            if (row.id === 'noDataRow') return;
-            row.cells[1].textContent = count++;
-        });
-    }
+    // Optional: prevent form submit if no items added
+    form.addEventListener('submit', function (e) {
+        if (tableBody.querySelectorAll('tr').length === 0 ||
+            tableBody.querySelector('#noDataRow')) {
+            e.preventDefault();
+            alert('Add at least one item to move.');
+        }
+    });
 });
 </script>
 @endsection

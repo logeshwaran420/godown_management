@@ -46,7 +46,7 @@
     </div>
 
     <div class="px-6 py-2 pb-6">
-        <h3 class="font-semibold text-lg mb-4">Inwards Item Details</h3>
+        <h3 class="font-semibold text-lg mb-4">Movement Item Details</h3>
         <table class="min-w-full text-sm text-left text-gray-500 border border-gray-200">
             <thead class="text-xs uppercase bg-gray-50 text-gray-700">
                 <tr>
@@ -85,7 +85,7 @@
                         {{ $detail->item->unit->abbreviation }}
                     </td>
                     <td class="border px-6 py-4">
-                        {{ $detail->item->price  }}
+                        ₹{{ $detail->item->price  }}
                     </td>
                 </tr>
                 @endforeach
@@ -106,7 +106,7 @@
                 <tr>
                     <th class="border px-2 py-2 text-left">Total Amount</th>
                     <td class="border px-2 py-2">
-                        {{ number_format($totalAmount, 2) }}
+                        ₹   {{ number_format($totalAmount, 2) }}
                     </td>
                 </tr>
             </table>

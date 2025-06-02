@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center py-3 px-3">
-        <h1 class="text-xl font-semibold">New Ledger</h1>
+        <h1 class="text-xl font-semibold">Edit Ledger</h1>
     </div>
     <form action="{{ route('ledgers.update',$ledger) }}" method="POST" class="max-w-3xl mx-auto space-y-6">
         @csrf

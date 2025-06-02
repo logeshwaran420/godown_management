@@ -10,25 +10,46 @@ use App\Models\Outward;
 use App\Models\OutwardDetail;
 use App\Models\Unit;
 use App\Models\Warehouse;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Validator;
 
 class OutwardController extends Controller
 {
-    public function index(){
-
-        
-          $warehouseId = session('warehouse_id');
-
-    $outwards = Outward::where('warehouse_id', $warehouseId)
-                    ->latest()
-                    ->paginate(5);
-
+    public function index()
+{
+    $warehouseId = session('warehouse_id');
     
-return view('outward.index',
- compact('outwards'));
-    }
+    // Get paginated outwards
+    $outwards = Outward::with(['ledger', 'details.item.unit'])
+                ->where('warehouse_id', $warehouseId)
+                ->latest()
+                ->paginate(5);
+
+
+    $totalAmount = Outward::where('warehouse_id', $warehouseId)
+                    ->sum('total_amount');
+
+
+    $monthCount = Outward::where('warehouse_id', $warehouseId)
+                    ->whereBetween('date', [
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth()
+                    ])
+                    ->count();
+
+    return view('outward.index', compact('outwards', 'totalAmount', 'monthCount'));
+}
+
+
+
+
+
+
+
+
+
 public function create()
 {
     $warehouseId = session('warehouse_id'); 
@@ -59,13 +80,12 @@ public function create()
 }
 public function store(Request $request)
 {
-    $validator = Validator::make($request->all(), [
-        'date' => 'required|date',
+   $validator = Validator::make($request->all(), [
+         'date' => 'required|date',
         'ledger_id' => 'required|exists:ledgers,id',
-        'invoice_no' => 'nullable|string',
         'items' => 'required|array|min:1',
         'items.*.item_id' => 'required|exists:items,id',
-        'items.*.quantity' => 'required|integer|min:1',
+        'items.*.quantity' => 'required|numeric|min:1',
         'items.*.price' => 'required|numeric|min:0',
     ]);
 
@@ -85,8 +105,8 @@ public function store(Request $request)
          $outward = Outward::create([
             'date' => $request->date,
             'ledger_id' => $request->ledger_id,
-            'warehouse_id' => $request->warehouse_id,
-            'invoice_no' => $request->invoice_no,
+            'warehouse_id' => session('warehouse_id'),
+         
         ]);
 
         foreach ($request->items as $itemData) {
@@ -111,7 +131,7 @@ public function store(Request $request)
              $item->decrement('current_stock', $itemData['quantity']);
 
             $inventory = Inventory::where('item_id', $itemData['item_id'])
-                                  ->where('warehouse_id', $request->warehouse_id)
+                                  ->where('warehouse_id', session('warehouse_id'))
                                   ->lockForUpdate()
                                   ->first();
 
@@ -160,6 +180,7 @@ public function store(Request $request)
             'message' => 'Error saving data: ' . $e->getMessage(),
         ], 500);
     }
+
 }
 public function show(Outward $outward){
     return view("outward.show",compact("outward"));
@@ -262,20 +283,18 @@ public function update(Request $request, Outward $outward)
 
                 $difference = $quantityNew - $quantityOld;
 
-                // Update outward_detail record
-                $oldDetail->update([
+               $oldDetail->update([
                     'quantity' => $quantityNew,
                     'price' => $rateNew,
                     'total_amount' => $quantityNew * $rateNew,
                 ]);
 
-                // Adjust Item current_stock (subtract difference)
                 $item = Item::find($itemId);
                 if ($item && $difference != 0) {
                     $item->decrement('current_stock', $difference);
                 }
-
-                // Adjust Inventory record stock for this warehouse (subtract difference)
+                
+                
                 $inventory = Inventory::firstOrCreate(
                     ['item_id' => $itemId, 'warehouse_id' => $warehouseId],
                     ['current_stock' => 0]
@@ -286,7 +305,6 @@ public function update(Request $request, Outward $outward)
 
                 $processedItemIds[] = $itemId;
             } else {
-                // New item detail - subtract quantity from stock
                 OutwardDetail::create([
                     'outward_id' => $outward->id,
                     'item_id' => $itemId,
@@ -295,14 +313,12 @@ public function update(Request $request, Outward $outward)
                     'total_amount' => $quantityNew * $rateNew,
                 ]);
 
-                // Decrement Item current_stock
                 $item = Item::find($itemId);
                 if ($item) {
                     $item->decrement('current_stock', $quantityNew);
                 }
 
-                // Decrement Inventory current_stock
-                $inventory = Inventory::firstOrCreate(
+                 $inventory = Inventory::firstOrCreate(
                     ['item_id' => $itemId, 'warehouse_id' => $warehouseId],
                     ['current_stock' => 0]
                 );

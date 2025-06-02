@@ -21,6 +21,11 @@ class CategoryController extends Controller
         ->with('success', 'Category created successfully.');
     }
 
+
+    public function show(Category $category){
+        return view("inventory.categories.show",compact('category'));
+    }
+
     public function update(Request $request, category $category){
    
         $validated = $request->validate([

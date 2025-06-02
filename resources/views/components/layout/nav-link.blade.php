@@ -3,6 +3,7 @@
     'active' => request()->url() === $href, // optional: exact match
 ])
 
+
 <a href="{{ $href }}"
    {{ $attributes->merge([
        'class' => 'block px-2 py-1 rounded transition duration-150 ease-in-out ' .

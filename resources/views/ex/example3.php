@@ -96,3 +96,100 @@
         </div>
     </div>
 </div> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@extends('layouts.app')
+
+@section('content')
+<div class="min-h-screen bg-gray-900 text-gray-300 py-8">
+    <div class="container mx-auto px-4">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-100">Outwards</h1>
+            <a href="{{ route('outwards.create') }}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white text-lg px-6 py-3 rounded-lg shadow-md transition duration-300">
+               + Outward
+            </a>
+        </div>
+
+        <!-- Dark Table -->
+        <div class="relative overflow-x-auto bg-gray-800 shadow-lg">
+            <table class="w-full text-base text-left text-gray-300">
+                <thead class="text-sm uppercase bg-gray-700 text-gray-400 sticky top-0 z-10 rounded-t-lg">
+                    <tr>
+                        <th scope="col" class="px-6 py-4 text-base">Date</th>
+                        <th scope="col" class="px-6 py-4 text-base">Vendor Name</th>
+                        <th scope="col" class="px-6 py-4 text-base">Quantity</th>
+                        <th scope="col" class="px-6 py-4 text-base">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($outwards as $outward)
+                        <tr 
+                            class="border-t border-gray-700 hover:bg-gray-700/50 transition cursor-pointer"
+                            onclick="window.location='{{ route('outwards.show', $outward) }}'">
+                            
+                            <!-- Date -->
+                            <td class="px-6 py-5 text-gray-200 font-medium text-lg">
+                                {{ \Carbon\Carbon::parse($outward->date)->format('d M Y') }}
+                            </td>
+
+                            <!-- Vendor Name -->
+                            <td class="px-6 py-5 text-lg">
+                                {{ $outward->ledger->name }}
+                            </td>
+
+                            <!-- Quantity -->
+                            <td class="px-6 py-5 text-lg">
+                                @php
+                                    $unitTotals = [];
+                                    foreach ($outward->details as $detail) {
+                                        $unit = $detail->item->unit;
+                                        $unitId = $unit->id;
+                                        $unitName = $unit->abbreviation;
+                                        $quantity = $detail->quantity;
+
+                                        if (!isset($unitTotals[$unitId])) {
+                                            $unitTotals[$unitId] = ['name' => $unitName, 'qty' => 0];
+                                        }
+
+                                        $unitTotals[$unitId]['qty'] += $quantity;
+                                    }
+                                @endphp
+
+                                @foreach ($unitTotals as $unit)
+                                    <div>{{ $unit['qty'] }}{{ $unit['name'] }}</div>
+                                @endforeach
+                            </td>
+
+                            <!-- Amount -->
+                            <td class="px-6 py-5 text-green-400 font-semibold text-lg">
+                                ₹{{ number_format($outward->total_amount, 2) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+                  {{-- <div class="px-4 py-6 border-t border-gray-700 text-base text-gray-400">
+                {{ $outwards->links() }}
+            </div> --}}
+        </div>
+    </div>
+</div>
+@endsection

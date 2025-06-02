@@ -55,7 +55,7 @@
             <tfoot class="bg-gray-100 font-semibold">
                 <tr>
                     <td colspan="9" class="text-right border px-2 py-2">Grand Total</td>
-                    <td id="grandTotal" class="border px-2 py-2 text-right">0.00</td>
+                    <td id="grandTotal" class="border px-2 py-2 text-right">₹0.00</td>
                 </tr>
             </tfoot>
         </table>
@@ -75,7 +75,7 @@
                 </tr>
                 <tr>
                     <th class="border px-2 py-2 text-left">Total Amount</th>
-                    <td id="totalPrice" class="border px-2 py-2">0.00</td>
+                    <td id="totalPrice" class="border px-2 py-2">₹0.00</td>
                 </tr>
             </table>
         </div>

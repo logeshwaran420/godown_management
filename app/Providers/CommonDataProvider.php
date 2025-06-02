@@ -21,22 +21,22 @@ class CommonDataProvider extends ServiceProvider
     public function boot(): void
     {
      
-          View::composer('*', function ($view) {
-            $categories = Category::all();
-            $units = Unit::all();
-            $ledgers = Ledger::all();
-            $customers = Ledger::where("type", "customer")->get();
-            $suppliers = Ledger::where("type", "supplier")->get();
-            $warehouses = Warehouse::all();
+        //   View::composer('*', function ($view) {
+        //     $categories = Category::all();
+        //     $units = Unit::all();
+        //     $ledgers = Ledger::all();
+        //     $customers = Ledger::where("type", "customer")->get();
+        //     $suppliers = Ledger::where("type", "supplier")->get();
+        //     $warehouses = Warehouse::all();
 
-            $view->with([
-                'categories' => $categories,
-                'units' => $units,
-                'ledgers' => $ledgers,
-                'customers' => $customers,
-                'suppliers' => $suppliers,
-                'warehouses' => $warehouses,
-            ]);
-        });
+        //     $view->with([
+        //         'categories' => $categories,
+        //         'units' => $units,
+        //         'ledgers' => $ledgers,
+        //         'customers' => $customers,
+        //         'suppliers' => $suppliers,
+        //         'warehouses' => $warehouses,
+        //     ]);
+        // });
     }
 }

@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.value = value;
                 items[index].entered_qty = value;
                 calculateTotals();
-                updateTable(); // update subtotal
+                updateTable();
                 checkEnableSave();
             });
         });
@@ -274,7 +274,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     deleteSelectedBtn.addEventListener('click', function () {
         const checkedBoxes = Array.from(document.querySelectorAll('.rowCheckbox:checked'));
-        // Remove from end to avoid index shifting issues
         checkedBoxes.sort((a, b) => b.dataset.index - a.dataset.index).forEach(chk => {
             items.splice(chk.dataset.index, 1);
         });
@@ -317,18 +316,19 @@ document.addEventListener('DOMContentLoaded', function () {
             warehouse_id: 1, // adjust if dynamic
             invoice_no: '',
             items: items.map(item => ({
+                item_id: item.id,
                 barcode: item.barcode,
                 category_id: item.category?.id || null,
                 name: item.name,
                 hsn_code: item.hsn_code || null,
-                entered_qty: item.entered_qty,
+                quantity: item.entered_qty,
                 unit_id: item.unit?.id || null,
                 price: item.price || 0,
             }))
         };
 
         saveBtn.disabled = true;
-        fetch('/outward', {
+        fetch('/outwards/store', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -342,13 +342,14 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(resp => {
                 alert('Outward entry saved successfully.');
-                // reset all fields
+                
                 items = [];
                 selectedLedgerId = null;
                 ledgerInput.value = '';
                 barcodeInput.value = '';
                 updateTable();
                 checkEnableSave();
+                  window.location.href = "{{ route('outwards') }}";
             })
             .catch(() => {
                 alert('Error saving data.');

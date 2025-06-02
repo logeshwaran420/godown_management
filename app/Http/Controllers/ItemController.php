@@ -96,4 +96,10 @@ class ItemController extends Controller
         return redirect()->route('inventory.items.show', $item)
                          ->with('success', 'Item updated successfully!');
     }
+
+    public function destroy(item $item){
+        $item->delete();
+
+        return redirect()->route('inventory.items');
+    }
 }

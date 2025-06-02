@@ -7,12 +7,21 @@ use Illuminate\Http\Request;
 
 class LedgerController extends Controller
 {
-    public function index(){
+ public function index()
+{
+    $query = Ledger::query();
 
-        $ledgers = Ledger::latest()->paginate(7);
-        
-return view('ledger.index',compact('ledgers'));
-    } 
+    $type = request('type');
+
+    if ($type && $type !== 'all') {
+        $query->where('type', $type);
+    }
+
+    $ledgers = $query->latest()->paginate(7);
+
+    return view('ledger.index', compact('ledgers'));
+}
+
 
     public function create(){
         return view("ledger.create");

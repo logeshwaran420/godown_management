@@ -38,7 +38,7 @@ Route::get('/items/create',[ItemController::class,"create"])->name('items.create
  Route::get('/items/show/{item}',[ItemController::class,"show"])->name('items.show');
 Route::get('/items/edit/{item}',[ItemController::class,"edit"])->name('items.edit');
 Route::put('/items/update/{item}',[ItemController::class,"update"])->name('items.update');
-
+Route::delete('/items/destroy/{item}',[ItemController::class,"destroy"])->name('items.destroy');
 
 
 
@@ -47,7 +47,10 @@ Route::put('/items/update/{item}',[ItemController::class,"update"])->name('items
 
 Route::get('/categories',[InventoryController::class,"categories"])->name('categories');
 Route::post('/categories/store',[CategoryController::class,'store'])->name('categories.store');
+Route::get('/categories/{category}',[CategoryController::class,'show'])->name('categories.show');
 Route::put('/categories/{category}',[CategoryController::class,'update'])->name('categories.update');
+
+
 
 Route::delete('/categories/destroy/{category}',[CategoryController::class,"destroy"])->name('categories.destroy');
 
@@ -115,13 +118,6 @@ Route::get('/test', function () {
     $items = Item::all();
     return view("test",compact('items'));
 });
-
-
-
-// Route::get('/ledger/{ledger}', [LedgerController::class, 'search']);
-// Route::get('/items/{barcode}', [ItemController::class, 'findByBarcode']);
-
-
 
 
 Route::get('/supplier/{ledger}', [InwardController::class, 'search']);

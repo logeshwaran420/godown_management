@@ -23,7 +23,6 @@
 
 <form action="{{ route('login.store') }}" method="POST" class="space-y-4">
     @csrf
-
     <div>
         <label for="warehouse_id" class="block font-semibold mb-1">Warehouse:</label>
         <select id="warehouse_id" name="warehouse_id"

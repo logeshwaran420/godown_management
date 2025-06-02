@@ -34,20 +34,20 @@ class DatabaseSeeder extends Seeder
         ]);
         
         Warehouse::factory(3)->create();
-        Category::factory(10)->create();
-        Ledger::factory(10)->create();
-        Item::factory(30)->create();
-      Outward::factory(5)
-            ->has(
-                OutwardDetail::factory()->count(3), 
-                'details')
-            ->create();
+    //     Category::factory(10)->create();
+         Ledger::factory(15)->create();
+    //     Item::factory(30)->create();
+    //   Outward::factory(5)
+    //         ->has(
+    //             OutwardDetail::factory()->count(3), 
+    //             'details')
+    //         ->create();
             
-                 Inward::factory(5)
-            ->has(
-                InwardDetail::factory()->count(3), 
-                'details'
-            )
-            ->create();
+    //              Inward::factory(5)
+    //         ->has(
+    //             InwardDetail::factory()->count(3), 
+    //             'details'
+    //         )
+    //         ->create();
     }
 }

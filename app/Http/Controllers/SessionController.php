@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Warehouse;
 use Auth;
 use Illuminate\Http\Request;
 
 class SessionController extends Controller
 {
     public function login(){
-        return view("auth.login");  
+        $warehouses = Warehouse::all();
+        return view("auth.login",compact('warehouses'));  
     }
 
     public function store(request $request){
+       // dd($request->all());
          $request->validate([
             'email' => 'required|email',
             'password' => 'required',

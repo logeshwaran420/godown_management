@@ -10,6 +10,7 @@ use App\Models\Item;
 use App\Models\Ledger;
 use App\Models\Unit;
 use App\Models\Warehouse;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Validator;
@@ -22,7 +23,22 @@ class InwardController extends Controller
     $inwards = Inward::where('warehouse_id', $warehouseId)
                     ->latest()
                     ->paginate(5);
-        return view('inward.index',compact('inwards'));
+
+                        $totalAmount = inward::where('warehouse_id', $warehouseId)
+                    ->sum('total_amount');
+
+
+    $monthCount = inward::where('warehouse_id', $warehouseId)
+                    ->whereBetween('date', [
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth()
+                    ])
+                    ->count();
+
+
+
+
+        return view('inward.index',compact('inwards','totalAmount','monthCount'));
     }
 
     public function create(){
@@ -237,7 +253,7 @@ public function update(Request $request, Inward $inward)
                         'unit_id' => $unitId,
                         'name' => $itemName,
                         'hsn_code' => $hsnCode,
-                        'price' => $rateNew, // optional if you want to update
+                        'price' => $rateNew, 
                     ]);
 
                     if ($difference != 0) {
@@ -255,7 +271,7 @@ public function update(Request $request, Inward $inward)
 
                 $processedItemIds[] = $itemId;
             } else {
-                // New item detail
+              
                 InwardDetail::create([
                     'inward_id' => $inward->id,
                     'item_id' => $itemId,
