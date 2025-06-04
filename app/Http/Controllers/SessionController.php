@@ -14,7 +14,7 @@ class SessionController extends Controller
     }
 
     public function store(request $request){
-       // dd($request->all());
+      
          $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -32,6 +32,7 @@ class SessionController extends Controller
 
         return back()->withErrors(['email' => 'Invalid credentials.'])->withInput();
     }
+  
 
 
 

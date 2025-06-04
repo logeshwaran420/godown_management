@@ -118,23 +118,12 @@
         </div>
 
         <!-- Pagination -->
-        <div class="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
-            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                <div>
-                    <p class="text-sm text-gray-700 dark:text-gray-300">
-                        Showing
-                        <span class="font-medium">{{ $movements->firstItem() }}</span>
-                        to
-                        <span class="font-medium">{{ $movements->lastItem() }}</span>
-                        of
-                        <span class="font-medium">{{ $movements->total() }}</span>
-                        results
-                    </p>
-                </div>
+        <div class="bg-white dark:bg-gray-800 px-4 py-3  border-t border-gray-200 dark:border-gray-700 sm:px-6">
+          
                 <div>
                     {{ $movements->links() }}
                 </div>
-            </div>
+            
         </div>
     </div>
 </div>

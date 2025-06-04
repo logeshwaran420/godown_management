@@ -6,17 +6,20 @@
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
             <div>
-        <h1 class="text-2xl font-bold text-gray-800 mb-2 md:mb-0">Outward Transactions</h1>
-           <p class="text-sm text-gray-500">Track all Outgoing inventory items</p>
+        <h1 class="text-2xl font-bold text-gray-800 mb-2 md:mb-0">Ledgers Transactions</h1>
+           <p class="text-sm text-gray-500">Track all ledgers transaction items</p>
             </div>
 
 
-        <a href="{{ route('outwards.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transition duration-200 flex items-center justify-center space-x-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            <span>New Outward</span>
-        </a>
+            <button type="button" 
+                onclick="window.location='{{ route('ledgers.show', $ledger) }}'"
+                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition flex items-center justify-center dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Back 
+            </button>
+     
     </div>
 
     
@@ -36,25 +39,30 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach ($outwards as $outward)
-                        <tr class="hover:bg-gray-50 transition cursor-pointer" onclick="window.location='{{ route('outwards.show', $outward) }}'">
+                    @foreach ($transactions as $transaction)
+                        @php
+        $route = $ledger->type === 'customer'
+            ? route('outwards.show', $transaction)
+            : route('inwards.show', $transaction);
+    @endphp
+                        <tr class="hover:bg-gray-50 transition cursor-pointer" onclick="window.location='{{ $route }}'">
                             <!-- Date -->
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">
-                                    {{ \Carbon\Carbon::parse($outward->date)->format('d M Y') }}
+                                    {{ \Carbon\Carbon::parse($transaction->date)->format('d M Y') }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    {{ \Carbon\Carbon::parse($outward->date)->diffForHumans() }}
+                                    {{ \Carbon\Carbon::parse($transaction->date)->diffForHumans() }}
                                 </div>
                             </td>
 
                             <!-- Vendor Name -->
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">
-                                    {{ $outward->ledger->name }}
+                                    {{ $transaction->ledger->name }}
                                 </div>
                                 <div class="text-xs text-gray-500">
-                                    {{ $outward->ledger->address ?? 'No address' }}
+                                    {{ $transaction->ledger->address ?? 'No address' }}
                                 </div>
                             </td>
 
@@ -62,7 +70,7 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @php
                                     $unitTotals = [];
-                                    foreach ($outward->details as $detail) {
+                                    foreach ($transaction->details as $detail) {
                                         $unit = $detail->item->unit;
                                         $unitId = $unit->id;
                                         $unitName = $unit->abbreviation;
@@ -86,7 +94,7 @@
                             <!-- Amount -->
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    ₹{{ number_format($outward->total_amount, 2) }}
+                                    ₹{{ number_format($transaction->total_amount, 2) }}
                                 </span>
                             </td>
                             
@@ -97,10 +105,10 @@
             </table>
         </div>
 
-        {{-- <!-- Pagination -->
+        <!-- Pagination -->
         <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-            {{ $outwards->links() }}
-        </div> --}}
+            {{ $transactions->links() }}
+        </div>
     </div>
 </div>
 

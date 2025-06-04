@@ -71,8 +71,26 @@ class LedgerController extends Controller
    $ledger->delete();
     return redirect()->route('ledgers')->with('success', 'Ledger deleted successfully.');
     }
-    
-    
+
+    public function show(ledger $ledger){
+        return view("ledger.show",compact('ledger'));
+    }
+ public function transaction(Ledger $ledger)
+{
+    if ($ledger->type === 'customer') {
+        $transactions = $ledger->outwards()->latest()->paginate(10);
+    } elseif ($ledger->type === 'supplier') {
+        $transactions = $ledger->inwards()->latest()->paginate(10); 
+    } else {
+        $transactions = collect()->paginate(10); 
+
+    }
+   
+    return view('ledger.transaction', compact('ledger', 'transactions'));
+
+
+}
+
 
 
 

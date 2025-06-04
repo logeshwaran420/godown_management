@@ -86,8 +86,12 @@ Route::prefix("/ledgers")->group(function(){
   Route::get('/create',[LedgerController::class,'create'])->name('ledgers.create');
   Route::post('/store',[LedgerController::class,'store'])->name('ledgers.store');
   Route::get("edit/{ledger}",[LedgerController::class,"edit"])->name("ledgers.edit");
+    Route::get("show/{ledger}",[LedgerController::class,"show"])->name("ledgers.show");
+     Route::get("transaction/{ledger}",[LedgerController::class,"transaction"])->name("ledgers.transaction");
   Route::put("update/{ledger}",[LedgerController::class,'update'])->name('ledgers.update');
   Route::delete("destory/{ledger}",[LedgerController::class,'destory'])->name('ledgers.destory');
+
+
   });
 
 

@@ -17,7 +17,7 @@ class Inward extends Model
 
       public function details()
     {
-        return $this->hasMany(InwardDetail::class); // Each outward has many outward details
+        return $this->hasMany(InwardDetail::class); 
     }
 
        public function warehouse()

@@ -26,11 +26,25 @@ class OutwardDetail extends Model
         return $this->belongsTo(Item::class);
     }
 
-    // Automatically update the outward totals when a detail is saved or updated
     protected static function booted()
     {
+        // Calculate total_amount before saving
+        static::saving(function ($detail) {
+            $detail->total_amount = $detail->quantity * $detail->price;
+        });
+
+        // Update totals on parent Outward after saving a detail
         static::saved(function ($detail) {
-          $detail->outward->updateTotals();
+            if ($detail->outward) {
+                $detail->outward->updateTotals();
+            }
+        });
+
+        // Update totals on parent Outward after deleting a detail
+        static::deleted(function ($detail) {
+            if ($detail->outward) {
+                $detail->outward->updateTotals();
+            }
         });
     }
 }

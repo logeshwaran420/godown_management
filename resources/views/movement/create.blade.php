@@ -12,10 +12,9 @@
                 Save
             </button>
         </div>
-
-        {{-- Inputs Grid --}}
         <div class="grid grid-cols-1 md:grid-cols-2 border-b gap-4 p-6 w-full">
-            {{-- From Warehouse (readonly) --}}
+
+            
             <div class="w-full">
                 <label class="block text-sm font-medium text-gray-700">From</label>
                 <input type="text" value="{{ $from_warehouse->name }}" readonly

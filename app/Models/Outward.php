@@ -26,16 +26,19 @@ class Outward extends Model
 
     
 
-     public function updateTotals()
+  public function updateTotals()
 {
     $this->load('details');
 
-    $this->total_quantity = $this->details->sum('quantity');
-    $this->total_amount = $this->details->sum(function ($detail) {
-        return $detail->quantity * $detail->price;
-    });
+    $totalQuantity = $this->details->sum('quantity');
+    $totalAmount = $this->details->sum(fn($detail) => $detail->quantity * $detail->price);
 
-    $this->save();
+    if ($this->total_quantity !== $totalQuantity || $this->total_amount !== $totalAmount) {
+        $this->total_quantity = $totalQuantity;
+        $this->total_amount = $totalAmount;
+        $this->save();
+    }
 }
+
 
 }

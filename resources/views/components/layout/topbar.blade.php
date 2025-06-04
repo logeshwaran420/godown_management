@@ -134,7 +134,7 @@
 
         let baseUrl = '';
         if (filterType === 'ledger') {
-            baseUrl = '/ledgers/edit/';
+            baseUrl = '/ledgers/show/';
         } else if (filterType === 'item') {
             baseUrl = 'inventory/items/show/';
         } else if (filterType === 'category') {

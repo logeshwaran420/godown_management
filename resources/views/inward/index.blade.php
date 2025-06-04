@@ -18,26 +18,6 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
-            <div class="text-gray-500 text-sm font-medium">Total Transactions</div>
-            <div class="text-2xl font-bold text-gray-800">{{ $inwards->total() }}</div>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
-            <div class="text-gray-500 text-sm font-medium">This Month</div>
-            <div class="text-2xl font-bold text-gray-800">{{ $monthCount ?? '0' }}</div>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow border-l-4 border-purple-500">
-            <div class="text-gray-500 text-sm font-medium">Total Amount</div>
-            <div class="text-2xl font-bold text-gray-800">₹{{ number_format($totalAmount ?? 0, 2) }}</div>
-        </div>
-    </div>
-
-    <!-- Table Section -->
-    
-
-        <!-- Table -->
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">

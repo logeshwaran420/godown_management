@@ -24,21 +24,13 @@ class InwardController extends Controller
                     ->latest()
                     ->paginate(5);
 
-                        $totalAmount = inward::where('warehouse_id', $warehouseId)
-                    ->sum('total_amount');
-
-
-    $monthCount = inward::where('warehouse_id', $warehouseId)
-                    ->whereBetween('date', [
-                        Carbon::now()->startOfMonth(),
-                        Carbon::now()->endOfMonth()
-                    ])
-                    ->count();
+                       
 
 
 
 
-        return view('inward.index',compact('inwards','totalAmount','monthCount'));
+
+        return view('inward.index',compact('inwards'));
     }
 
     public function create(){
@@ -53,13 +45,14 @@ class InwardController extends Controller
         ->get();
 
 
-    $items = $inventories->map(function($inventory) {
-        $item = $inventory->item;
-        if ($item) {
-            $item->current_stock = $inventory->current_stock; 
-        }
-        return $item;
-    })->filter()->values();
+    // $items = $inventories->map(function($inventory) {
+    //     $item = $inventory->item;
+    //     if ($item) {
+    //         $item->current_stock = $inventory->current_stock; 
+    //     }
+    //     return $item;
+    // })->filter()->values();
+    $items = item::all();
 
 
     $ledgers = Ledger::where('type', 'supplier')->get();

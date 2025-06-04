@@ -33,7 +33,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                     </svg>
-                    Edit Item
+                    Edit 
                 </button>
 
                 <form action="{{ route('inventory.items.destroy', $item) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?');" class="inline">
@@ -117,12 +117,12 @@
                         </div>
                     </div>
                     
-                    <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
+                    {{-- <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
                         <p class="text-sm font-medium text-purple-800">Total Inventory Value</p>
                         <div class="mt-2 flex items-baseline">
                             <p class="text-3xl font-bold text-purple-900">₹{{ number_format($item->current_stock * $item->price, 2) }}</p>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 

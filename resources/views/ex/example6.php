@@ -16,6 +16,7 @@
             </button>
         </div>
     </div>
+
     <form method="POST" action="{{ route('outwards.update', $outward->id) }}" id="outwardForm">
         @csrf
         @method('PUT')
@@ -76,13 +77,6 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="itemsTableBody">
                         @foreach ($outward->details as $index => $detail)
-                       @php
-$warehouseId = session('warehouse_id'); 
-                       $current =  $detail->item->inventories->firstWhere('warehouse_id', $warehouseId);
-                        
-                      $stock = $current->current_stock ?? 0;
-
-                        @endphp
                         <tr class="hover:bg-gray-50" data-item-id="{{ $detail->item->id }}">
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <input type="checkbox" class="rowCheckbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
@@ -100,12 +94,11 @@ $warehouseId = session('warehouse_id');
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                                 {{ $detail->item->hsn_code }}
                             </td>
-                           <td class="px-4 py-3 whitespace-nowrap">
-    <input type="number" name="quantities[]" value="{{ $detail->quantity }}"
-        class="qtyInput w-20 border-gray-300 rounded-md text-sm px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500"
-        min="1" data-rate="{{ $detail->item->price }}" data-current-stock="{{ $stock }}">
-</td>
-
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="number" name="quantities[]" value="{{ $detail->quantity }}"
+                                    class="qtyInput w-20 border-gray-300 rounded-md text-sm px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500"
+                                    min="1" data-rate="{{ $detail->item->price }}">
+                            </td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                                 {{ $detail->item->unit->abbreviation }}
                             </td>
@@ -115,6 +108,7 @@ $warehouseId = session('warehouse_id');
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
                                 ₹{{ number_format($detail->quantity * $detail->item->price, 2) }}
                             </td>
+                            <!-- Hidden inputs -->
                             <td style="display:none;">
                                 <input type="hidden" name="item_ids[]" value="{{ $detail->item->id }}">
                                 <input type="hidden" name="rates[]" value="{{ $detail->item->price }}">
@@ -165,6 +159,7 @@ $warehouseId = session('warehouse_id');
         </div>
     </form>
 </div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const barcodeInput = document.getElementById("barcodeInput");
@@ -172,8 +167,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const deleteBtn = document.getElementById("deleteSelectedBtn");
     const selectAllCheckbox = document.getElementById("selectAll");
     let slnoCounter = {{ $outward->details->count() + 1 }};
-    let items = [];
 
+    // Calculate totals
     function calculateTotals() {
         let totalQty = 0;
         let totalAmount = 0;
@@ -181,16 +176,19 @@ document.addEventListener("DOMContentLoaded", function () {
         tbody.querySelectorAll("tr").forEach(row => {
             const qtyInput = row.querySelector('.qtyInput');
             if (!qtyInput) return;
-
+            
             const qty = parseFloat(qtyInput.value) || 0;
             const rate = parseFloat(row.querySelector('input[name="rates[]"]').value) || 0;
             const subtotal = qty * rate;
 
+            // Update subtotal cell
             const subtotalCell = row.querySelector('td:nth-child(10)');
             if (subtotalCell) {
                 subtotalCell.textContent = subtotal.toLocaleString('en-IN', {
                     style: 'currency',
-                    currency: 'INR'
+                    currency: 'INR',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
                 });
             }
 
@@ -198,40 +196,35 @@ document.addEventListener("DOMContentLoaded", function () {
             totalAmount += subtotal;
         });
 
+        // Update summary
         document.getElementById("totalQty").textContent = totalQty;
         document.getElementById("totalAmount").textContent = totalAmount.toLocaleString('en-IN', {
             style: 'currency',
-            currency: 'INR'
+            currency: 'INR',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
         document.getElementById("grandTotal").textContent = totalAmount.toLocaleString('en-IN', {
             style: 'currency',
-            currency: 'INR'
+            currency: 'INR',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
     }
 
+    // Toggle delete button visibility
     function toggleDeleteButton() {
         const anyChecked = document.querySelectorAll(".rowCheckbox:checked").length > 0;
         deleteBtn.classList.toggle("hidden", !anyChecked);
     }
 
+    // Bind events to a row
     function bindRowEvents(row) {
         const qtyInput = row.querySelector('.qtyInput');
         const checkbox = row.querySelector('.rowCheckbox');
 
         if (qtyInput) {
-            qtyInput.addEventListener("input", function () {
-                let enteredQty = parseInt(qtyInput.value) || 1;
-                const currentStock = parseInt(qtyInput.getAttribute('data-current-stock')) || Infinity;
-
-                if (enteredQty < 1) enteredQty = 1;
-                if (enteredQty > currentStock) {
-                    alert(`Quantity cannot exceed current stock (${currentStock})`);
-                    enteredQty = currentStock;
-                }
-
-                qtyInput.value = enteredQty;
-                calculateTotals();
-            });
+            qtyInput.addEventListener("input", calculateTotals);
         }
 
         if (checkbox) {
@@ -239,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    selectAllCheckbox.addEventListener("change", function () {
+    selectAllCheckbox.addEventListener("change", function() {
         tbody.querySelectorAll(".rowCheckbox").forEach(checkbox => {
             checkbox.checked = selectAllCheckbox.checked;
         });
@@ -253,6 +246,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const barcode = barcodeInput.value.trim();
             if (!barcode) return;
 
+            // Show loading state
             barcodeInput.disabled = true;
             barcodeInput.classList.add('opacity-75');
 
@@ -261,58 +255,57 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (!res.ok) throw new Error("Item not found");
                     return res.json();
                 })
-                .then(data => {
-                    if (!data.current_stock || data.current_stock <= 0) {
-                        alert('Item is unavailable in the godown');
-                        barcodeInput.value = '';
-                        return;
-                    }
-
-
+                .then(item => {
                     const existingRow = Array.from(tbody.querySelectorAll("tr")).find(row => {
-                        return row.querySelector("td:nth-child(3)")?.textContent.trim() === data.barcode;
+                        return row.querySelector("td:nth-child(3)")?.textContent.trim() === item.barcode;
                     });
 
                     if (existingRow) {
-                        const qtyInput = existingRow.querySelector('.qtyInput');
-                        const currentStock = parseInt(qtyInput.getAttribute('data-current-stock')) || 3;
-                        let currentQty = parseInt(qtyInput.value) || 1;
-
-                        if (currentQty < currentStock) {
-                            qtyInput.value = currentQty + 1;
-                            qtyInput.dispatchEvent(new Event('input'));
-                        } else {
-                            alert('Quantity reached maximum available stock.');
-                        }
-
+                       
                         existingRow.classList.add('bg-yellow-50');
                         setTimeout(() => existingRow.classList.remove('bg-yellow-50'), 1000);
+                        
+                        const qtyInput = existingRow.querySelector('.qtyInput');
+                        qtyInput.value = parseInt(qtyInput.value) + 1;
+                        qtyInput.dispatchEvent(new Event('input'));
                     } else {
-                        data.entered_qty = 1;
-                        items.push(data);
-
+                       
                         const tr = document.createElement("tr");
                         tr.className = "hover:bg-gray-50";
-                        tr.setAttribute('data-item-id', data.id);
+                        tr.setAttribute('data-item-id', item.id);
 
                         tr.innerHTML = `
-                            <td class="px-4 py-3"><input type="checkbox" class="rowCheckbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"></td>
-                            <td class="px-4 py-3 text-sm">${slnoCounter++}</td>
-                            <td class="px-4 py-3 text-sm font-medium">${data.barcode}</td>
-                            <td class="px-4 py-3 text-sm">${data.category?.name || ''}</td>
-                            <td class="px-4 py-3 text-sm">${data.name}</td>
-                            <td class="px-4 py-3 text-sm">${data.hsn_code || ''}</td>
-                            <td class="px-4 py-3">
-                                <input type="number" name="quantities[]" value="1" min="1"
-                                    class="qtyInput w-20 border-gray-300 rounded-md text-sm px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500"
-                                    data-rate="${data.price || 0}" data-current-stock="${data.current_stock || 0}">
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="checkbox" class="rowCheckbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                             </td>
-                            <td class="px-4 py-3 text-sm">${data.unit?.abbreviation || ''}</td>
-                            <td class="px-4 py-3 text-sm">₹${parseFloat(data.price || 0).toFixed(2)}</td>
-                            <td class="px-4 py-3 text-sm text-right">₹${parseFloat(data.price || 0).toFixed(2)}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${slnoCounter++}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                ${item.barcode}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                ${item.category?.name || ''}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                ${item.name}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                ${item.hsn_code || ''}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="number" name="quantities[]" value="1" class="qtyInput w-20 border-gray-300 rounded-md text-sm px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500" min="1" data-rate="${item.price || 0}">
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                ${item.unit?.abbreviation || ''}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                ₹${item.price ? parseFloat(item.price).toFixed(2) : '0.00'}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                                ₹${item.price ? parseFloat(item.price).toFixed(2) : '0.00'}
+                            </td>
                             <td style="display:none;">
-                                <input type="hidden" name="item_ids[]" value="${data.id}">
-                                <input type="hidden" name="rates[]" value="${data.price || 0}">
+                                <input type="hidden" name="item_ids[]" value="${item.id}">
+                                <input type="hidden" name="rates[]" value="${item.price || 0}">
                             </td>
                         `;
 
@@ -325,7 +318,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     barcodeInput.focus();
                 })
                 .catch(err => {
-                    alert(err.message || "Failed to fetch item");
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg flex items-center';
+                    toast.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                        ${err.message || "Failed to fetch item"}
+                    `;
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 3000);
                 })
                 .finally(() => {
                     barcodeInput.disabled = false;
@@ -334,6 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // Delete selected rows
     deleteBtn.addEventListener("click", function () {
         if (confirm("Are you sure you want to delete the selected items?")) {
             document.querySelectorAll(".rowCheckbox:checked").forEach(cb => {
@@ -346,21 +349,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    document.getElementById('outwardForm').addEventListener('submit', function (e) {
+
+    document.getElementById('outwardForm').addEventListener('submit', function(e) {
         if (tbody.querySelectorAll("tr").length === 0) {
             e.preventDefault();
             alert("Please add at least one item before saving.");
             barcodeInput.focus();
         }
     });
-
+    
     tbody.querySelectorAll("tr").forEach(bindRowEvents);
 });
+    
+
 </script>
-
-
-
-
-
-
 @endsection

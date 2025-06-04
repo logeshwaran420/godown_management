@@ -1,36 +1,37 @@
 @extends('layouts.app')
 
 @section('content')
-<form method="POST" action="{{ route('inwards.update', $inward->id) }}">
-    @csrf
-    @method('PUT')
-
-    <div class="w-full mx-auto bg-white px-4 py-6">
-
-        <div class="flex justify-between items-center border-b px-6 py-4">
-            <h2 class="text-xl font-semibold">Edit Inward </h2>
-            <button type="submit" id="saveBtn"
-                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                Save
+<div class="w-full mx-auto bg-white">
+    <div class="flex justify-between items-center border-b px-6 py-4 bg-gray-50">
+        <h2 class="text-xl font-semibold text-gray-800">Edit Inward Entry</h2>
+        <div class="flex space-x-2">
+            <a href="{{ route('inwards') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200">
+                Cancel
+            </a>
+            <button type="submit" form="inwardForm" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Save Changes
             </button>
         </div>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 border-b gap-4 p-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Date</label>
-                <input 
-                    type="date" 
-                    id="formDate" 
-                    name="date"
-                    class="mt-1 block w-full border rounded px-3 py-2"
-                    value="{{ $inward->date }}"
-                    max="{{ date('Y-m-d') }}" 
-                    required>
+    <form method="POST" action="{{ route('inwards.update', $inward->id) }}" id="inwardForm">
+        @csrf
+        @method('PUT')
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 border-b">
+            <div class="space-y-1">
+                <label class="block text-sm font-medium text-gray-700">Date*</label>
+                <input type="date" name="date" value="{{ $inward->date }}" max="{{ date('Y-m-d') }}" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border">
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Ledger</label>
-                <select id="ledgerInput" name="ledger_id"
-                    class="mt-1 block w-full border rounded px-3 py-2 bg-white" required>
+
+            <div class="relative space-y-1">
+                <label class="block text-sm font-medium text-gray-700">Supplier*</label>
+                <select name="ledger_id" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border bg-white">
                     @foreach ($ledgers as $ledger)
                         <option value="{{ $ledger->id }}" {{ $ledger->id == $inward->ledger_id ? 'selected' : '' }}>
                             {{ $ledger->name }}
@@ -39,147 +40,190 @@
                 </select>
             </div>
 
-            <div>
+            <div class="space-y-1">
                 <label class="block text-sm font-medium text-gray-700">Barcode</label>
-                <input type="text" id="barcodeInput" placeholder="Enter Barcode"
-                    class="mt-1 block w-full border rounded px-3 py-2" autofocus>
+                <input type="text" id="barcodeInput" placeholder="Scan barcode..."
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 border"
+                    autofocus>
             </div>
         </div>
 
-        <div class="px-6 py-2 pb-6">
-            <h3 class="font-semibold text-lg mb-4">Inwards Item Details</h3>
-            <div class="overflow-x-auto w-full">
-                <table class="w-full text-sm text-gray-500 border border-gray-200">
-                    <thead class="bg-gray-50 text-xs uppercase text-gray-700 text-center">
+        <div class="px-6 py-4">
+            <h3 class="font-semibold text-lg mb-4 text-gray-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                </svg>
+                Inward Items
+            </h3>
+            
+          
+
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th class="border px-2 py-2">Select</th>
-                            <th class="border px-2 py-2">Slno</th>
-                            <th class="border px-2 py-2">Barcode</th>
-                            <th class="border px-2 py-2">Category</th>
-                            <th class="border px-2 py-2">Item</th>
-                            <th class="border px-2 py-2">HSN Code</th>
-                            <th class="border px-2 py-2">Qty</th>
-                            <th class="border px-2 py-2">Unit</th>
-                            <th class="border px-2 py-2">Rate</th>
-                            <th class="border px-2 py-2">Subtotal</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
+                                <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Barcode</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">HSN</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                         </tr>
                     </thead>
-                    <tbody class="text-center text-black">
+                    <tbody class="bg-white divide-y divide-gray-200" id="itemsTableBody">
                         @foreach ($inward->details as $index => $detail)
-                            <tr>
-                                <td><input type="checkbox" class="rowCheckbox"></td>
-                                <td class="border px-2 py-2 slno">{{ $index + 1 }}</td>
-                                <td class="border px-2 py-2 barcode-cell">{{ $detail->item->barcode }}</td>
-                                <td class="border px-2 py-2">
-                                    <select name="category_ids[]" class="w-full border rounded px-2 py-1">
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}" {{ $category->id == $detail->item->category_id ? 'selected' : '' }}>
-                                                {{ $category->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                                <td class="border px-2 py-2">
-                                    <input type="text" name="item_names[]" value="{{ $detail->item->name }}"
-                                        class="w-full border rounded px-2 py-1 text-center">
-                                </td>
-                                <td class="border px-2 py-2">
-                                    <input type="text" name="hsn_codes[]" value="{{ $detail->item->hsn_code }}"
-                                        class="w-full border rounded px-2 py-1 text-center">
-                                </td>
-                                <td class="border px-2 py-2">
-                                    <input type="number" name="quantities[]" value="{{ $detail->quantity }}"
-                                        class="w-full border rounded px-2 py-1 text-center qty-input" min="1"
-                                        data-rate="{{ $detail->item->price }}">
-                                </td>
-                                <td class="border px-2 py-2">
-                                    <select name="unit_ids[]" class="w-full border rounded px-2 py-1">
-                                        @foreach ($units as $unit)
-                                            <option value="{{ $unit->id }}" {{ $unit->id == $detail->item->unit_id ? 'selected' : '' }}>
-                                                {{ $unit->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                                <td class="border px-2 py-2 rate-cell">{{ $detail->item->price }}</td>
-                                <td class="border px-2 py-2 subtotal-cell">{{ number_format($detail->quantity * $detail->item->price, 2) }}</td>
-
-                                {{-- Hidden inputs for existing item IDs and rates --}}
-                                <td style="display:none;">
-                                    <input type="hidden" name="item_ids[]" value="{{ $detail->item->id }}">
-                                    <input type="hidden" name="rates[]" value="{{ $detail->item->price }}">
-                                </td>
-                            </tr>
+                        <tr class="hover:bg-gray-50" data-item-id="{{ $detail->item->id }}">
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="checkbox" class="rowCheckbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ $detail->item->barcode }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <select name="category_ids[]" class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}" {{ $category->id == $detail->item->category_id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="text" name="item_names[]" value="{{ $detail->item->name }}"
+                                    class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="text" name="hsn_codes[]" value="{{ $detail->item->hsn_code }}"
+                                    class="w-24 border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="number" name="quantities[]" value="{{ $detail->quantity }}"
+                                    class="qtyInput w-20 border-gray-300 rounded-md text-sm px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500"
+                                    min="1" data-rate="{{ $detail->item->price }}">
+                            </td>
+                            <td class=" whitespace-nowrap">
+                                <select name="unit_ids[]" class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
+                                    @foreach ($units as $unit)
+                                        <option value="{{ $unit->id }}" {{ $unit->id == $detail->item->unit_id ? 'selected' : '' }}>
+                                            {{ $unit->abbreviation }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                ₹{{ number_format($detail->item->price, 2) }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                                ₹{{ number_format($detail->quantity * $detail->item->price, 2) }}
+                            </td>
+                            <!-- Hidden inputs -->
+                            <td style="display:none;">
+                                <input type="hidden" name="item_ids[]" value="{{ $detail->item->id }}">
+                                <input type="hidden" name="rates[]" value="{{ $detail->item->price }}">
+                            </td>
+                        </tr>
                         @endforeach
                     </tbody>
-                     <tfoot class="bg-gray-100 font-semibold">
-                <tr>
-                    <td colspan="9" class="text-right border px-2 py-2">Grand Total</td>
-                    <td id="grandTotal" class="border px-2 py-2 text-right">0.00</td>
-                </tr>
-            </tfoot>
+                    <tfoot class="bg-gray-50">
+                        <tr>
+                            <td colspan="9" class="px-4 py-3 text-right text-sm font-medium text-gray-700">Grand Total</td>
+                            <td class="px-4 py-3 text-right text-sm font-medium text-gray-900" id="grandTotal">
+                                ₹{{ number_format($inward->total_amount, 2) }}
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
-
-                <button type="button" id="deleteSelectedBtn"
-                    class="mt-4 bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600 hidden">
-                    Delete
+            </div>
+            <button type="button" id="deleteSelectedBtn"
+                    class=" mt-4 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    Delete 
                 </button>
-            </div>
         </div>
 
-        <div class="mt-6 border-t px-6 py-4">
-            <h3 class="font-semibold mb-2">Summary</h3>
-            <div class="overflow-x-auto w-full">
-                <table class="text-sm border">
-                    <tr>
-                        <th class="border px-2 py-2 text-left">Total Qty</th>
-                        <td class="border px-2 py-2 total-qty">{{ $inward->total_quantity }}</td>
-                    </tr>
-                    <tr>
-                        <th class="border px-2 py-2 text-left">Total Amount</th>
-                        <td class="border px-2 py-2 total-amount">{{ number_format($inward->total_amount, 2) }}</td>
-                    </tr>
-                </table>
+        <div class="mt-2 border-t px-6 py-4 bg-gray-50">
+            <h3 class="font-semibold mb-3 text-gray-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                Summary
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-600">Total Quantity</span>
+                        <span id="totalQty" class="text-lg font-semibold text-gray-800">{{ $inward->total_quantity }}</span>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-600">Total Amount</span>
+                        <span id="totalAmount" class="text-lg font-semibold text-blue-600">₹{{ number_format($inward->total_amount, 2) }}</span>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const barcodeInput = document.getElementById("barcodeInput");
-    const tbody = document.querySelector("tbody");
+    const tbody = document.getElementById("itemsTableBody");
     const deleteBtn = document.getElementById("deleteSelectedBtn");
+    const selectAllCheckbox = document.getElementById("selectAll");
     let slnoCounter = {{ $inward->details->count() + 1 }};
-
-    function recalcSlno() {
-        tbody.querySelectorAll("tr").forEach((row, i) => {
-            const slnoCell = row.querySelector(".slno");
-            if(slnoCell) slnoCell.textContent = i + 1;
-        });
-        slnoCounter = tbody.querySelectorAll("tr").length + 1;
-    }
 
     function calculateTotals() {
         let totalQty = 0;
         let totalAmount = 0;
 
         tbody.querySelectorAll("tr").forEach(row => {
-            const qtyInput = row.querySelector('input[name="quantities[]"]');
-            const qty = parseFloat(qtyInput?.value || 0);
-            const rate = parseFloat(row.querySelector(".rate-cell")?.textContent || 0);
-            const subtotalCell = row.querySelector(".subtotal-cell");
-
+            const qtyInput = row.querySelector('.qtyInput');
+            if (!qtyInput) return;
+            
+            const qty = parseFloat(qtyInput.value) || 0;
+            const rate = parseFloat(row.querySelector('input[name="rates[]"]').value) || 0;
             const subtotal = qty * rate;
-            if(subtotalCell) subtotalCell.textContent = subtotal.toFixed(2);
+
+             const subtotalCell = row.querySelector('td:nth-child(10)');
+            if (subtotalCell) {
+                subtotalCell.textContent = subtotal.toLocaleString('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
 
             totalQty += qty;
             totalAmount += subtotal;
         });
 
-        document.querySelector(".total-qty").textContent = totalQty;
-        document.querySelector(".total-amount").textContent = totalAmount.toFixed(2);
-        document.getElementById("grandTotal").textContent = totalAmount.toFixed(2);
+       
+        document.getElementById("totalQty").textContent = totalQty;
+        document.getElementById("totalAmount").textContent = totalAmount.toLocaleString('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("grandTotal").textContent = totalAmount.toLocaleString('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
     }
 
     function toggleDeleteButton() {
@@ -188,19 +232,24 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function bindRowEvents(row) {
-        const qtyInput = row.querySelector('input[name="quantities[]"]');
+        const qtyInput = row.querySelector('.qtyInput');
         const checkbox = row.querySelector('.rowCheckbox');
 
         if (qtyInput) {
-            qtyInput.addEventListener("input", () => {
-                calculateTotals();
-            });
+            qtyInput.addEventListener("input", calculateTotals);
         }
 
         if (checkbox) {
             checkbox.addEventListener("change", toggleDeleteButton);
         }
     }
+
+    selectAllCheckbox.addEventListener("change", function() {
+        tbody.querySelectorAll(".rowCheckbox").forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+        toggleDeleteButton();
+    });
 
     barcodeInput.addEventListener("keypress", function (e) {
         if (e.key === "Enter") {
@@ -209,6 +258,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const barcode = barcodeInput.value.trim();
             if (!barcode) return;
 
+          
+            barcodeInput.disabled = true;
+            barcodeInput.classList.add('opacity-75');
+
             fetch(`/inward/${barcode}`)
                 .then(res => {
                     if (!res.ok) throw new Error("Item not found");
@@ -216,43 +269,55 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
                 .then(item => {
                     const existingRow = Array.from(tbody.querySelectorAll("tr")).find(row => {
-                        return row.querySelector(".barcode-cell")?.textContent.trim() === item.barcode;
+                        return row.querySelector("td:nth-child(3)")?.textContent.trim() === item.barcode;
                     });
 
                     if (existingRow) {
-                        const qtyInput = existingRow.querySelector('input[name="quantities[]"]');
+                        existingRow.classList.add('bg-yellow-50');
+                        setTimeout(() => existingRow.classList.remove('bg-yellow-50'), 1000);
+                        
+                        const qtyInput = existingRow.querySelector('.qtyInput');
                         qtyInput.value = parseInt(qtyInput.value) + 1;
-                        // existingRow.classList.add('bg-yellow-100');
-                        // setTimeout(() => existingRow.classList.remove('bg-yellow-100'), 500);
-                        calculateTotals();
+                        qtyInput.dispatchEvent(new Event('input'));
                     } else {
+
                         const tr = document.createElement("tr");
+                        tr.className = "hover:bg-gray-50";
+                        tr.setAttribute('data-item-id', item.id);
 
                         tr.innerHTML = `
-                            <td><input type="checkbox" class="rowCheckbox" /></td>
-                            <td class="border px-2 py-2 slno">${slnoCounter++}</td>
-                            <td class="border px-2 py-2 barcode-cell">${item.barcode}</td>
-                            <td class="border px-2 py-2">
-                                <select name="category_ids[]" class="w-full border rounded px-2 py-1">
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="checkbox" class="rowCheckbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${slnoCounter++}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                ${item.barcode}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <select name="category_ids[]" class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
                                     ${item.category ? `<option value="${item.category.id}" selected>${item.category.name}</option>` : '<option value="">Select</option>'}
                                 </select>
                             </td>
-                            <td class="border px-2 py-2">
-                                <input type="text" name="item_names[]" value="${item.name}" class="w-full border rounded px-2 py-1 text-center" />
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="text" name="item_names[]" value="${item.name}" class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
                             </td>
-                            <td class="border px-2 py-2">
-                                <input type="text" name="hsn_codes[]" value="${item.hsn_code || ''}" class="w-full border rounded px-2 py-1 text-center" />
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="text" name="hsn_codes[]" value="${item.hsn_code || ''}" class="w-24 border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
                             </td>
-                            <td class="border px-2 py-2">
-                                <input type="number" name="quantities[]" value="1" class="w-full border rounded px-2 py-1 text-center qty-input" min="1" data-rate="${item.price || 0}" />
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <input type="number" name="quantities[]" value="1" class="qtyInput w-20 border-gray-300 rounded-md text-sm px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500" min="1" data-rate="${item.price || 0}">
                             </td>
-                            <td class="border px-2 py-2">
-                                <select name="unit_ids[]" class="w-full border rounded px-2 py-1">
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <select name="unit_ids[]" class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
                                     ${item.unit ? `<option value="${item.unit.id}" selected>${item.unit.name}</option>` : '<option value="">Select</option>'}
                                 </select>
                             </td>
-                            <td class="border px-2 py-2 rate-cell">${item.price || 0}</td>
-                            <td class="border px-2 py-2 subtotal-cell">0.00</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                ₹${item.price ? parseFloat(item.price).toFixed(2) : '0.00'}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                                ₹${item.price ? parseFloat(item.price).toFixed(2) : '0.00'}
+                            </td>
                             <td style="display:none;">
                                 <input type="hidden" name="item_ids[]" value="${item.id}">
                                 <input type="hidden" name="rates[]" value="${item.price || 0}">
@@ -268,25 +333,47 @@ document.addEventListener("DOMContentLoaded", function () {
                     barcodeInput.focus();
                 })
                 .catch(err => {
-                    alert(err.message || "Failed to fetch item");
+
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg flex items-center';
+                    toast.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                        ${err.message || "Failed to fetch item"}
+                    `;
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 3000);
+                })
+                .finally(() => {
+                    barcodeInput.disabled = false;
+                    barcodeInput.classList.remove('opacity-75');
                 });
         }
     });
 
     deleteBtn.addEventListener("click", function () {
-        document.querySelectorAll(".rowCheckbox:checked").forEach(cb => {
-            cb.closest("tr").remove();
-        });
+        if (confirm("Are you sure you want to delete the selected items?")) {
+            document.querySelectorAll(".rowCheckbox:checked").forEach(cb => {
+                cb.closest("tr").remove();
+            });
 
-        deleteBtn.classList.add("hidden");
-        recalcSlno();
-        calculateTotals();
+            deleteBtn.classList.add("hidden");
+            selectAllCheckbox.checked = false;
+            calculateTotals();
+        }
     });
 
-    // Bind events to existing rows on page load
-    tbody.querySelectorAll("tr").forEach(bindRowEvents);
+    document.getElementById('inwardForm').addEventListener('submit', function(e) {
+        if (tbody.querySelectorAll("tr").length === 0) {
+            e.preventDefault();
+            alert("Please add at least one item before saving.");
+            barcodeInput.focus();
+        }
+    });
 
-    calculateTotals();
+    tbody.querySelectorAll("tr").forEach(bindRowEvents);
 });
+
 </script>
 @endsection

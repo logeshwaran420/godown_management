@@ -1,4 +1,4 @@
-<div>
+{{-- <div>
     <button wire:click="$set('showModal', true)"   type="button" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
        + New
     </button>
@@ -91,4 +91,4 @@
         </div>
     </div>
     @endif
-</div>
+</div> --}}

@@ -19,38 +19,20 @@ class InventoryController extends Controller
 
     $warehouse = Warehouse::findOrFail($warehouseId);
 
-    $inventories = $warehouse->inventories()
-        ->with(['item' => function($query) {
-            $query->with(['unit', 'category']); 
-        }])
-        ->latest()
-        ->paginate(6);
+    $inventories = item::latest()->paginate(10);
 
-    $totalItems = $warehouse->inventories()->sum('current_stock');
-    
 
-$totalValue = $warehouse->inventories()
-    ->with('item') 
-    ->get() 
-    ->sum(function($inventory) {
-        return $inventory->current_stock * $inventory->item->price;
-    });
-
-    
-$lowStockItems = $warehouse->inventories()
-    ->where('current_stock', '<=', 10) 
-    ->count();
 
 
     $commonData = $this->getCommonData();
 
     return view("inventory.items.index", array_merge([
         'inventories' => $inventories,
-        'warehouse' => $warehouse,
-        'totalItems' => $totalItems,
-        'totalValue' => $totalValue,
-         'lowStockItems' => $lowStockItems,
+       
     ], $commonData));
+
+
+
 }
     public function categories()
     {

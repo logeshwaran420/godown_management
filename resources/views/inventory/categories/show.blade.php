@@ -26,29 +26,6 @@
             </div>
         </div>
 
-        {{-- Category Items Summary --}}
-        <div class="px-6 py-5 border-b border-gray-200">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    <p class="text-sm font-medium text-blue-800">Total Items</p>
-                    <p class="mt-2 text-3xl font-bold text-blue-900">{{ $category->items->count() }}</p>
-                </div>
-                
-                <div class="bg-green-50 p-4 rounded-lg border border-green-100">
-                    <p class="text-sm font-medium text-green-800">Total Quantity</p>
-                    <p class="mt-2 text-3xl font-bold text-green-900">
-                        {{ $category->items->sum('current_stock') }}
-                    </p>
-                </div>
-                
-                <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
-                    <p class="text-sm font-medium text-purple-800">Total Inventory Value</p>
-                    <p class="mt-2 text-3xl font-bold text-purple-900">
-                        ₹{{ number_format($category->items->sum(function($item) { return $item->current_stock * $item->price; }), 2) }}
-                    </p>
-                </div>
-            </div>
-        </div>
 
         {{-- Items Table --}}
         <div class="px-6 py-5">

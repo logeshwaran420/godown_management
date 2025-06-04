@@ -21,25 +21,14 @@ class OutwardController extends Controller
 {
     $warehouseId = session('warehouse_id');
     
-    // Get paginated outwards
     $outwards = Outward::with(['ledger', 'details.item.unit'])
                 ->where('warehouse_id', $warehouseId)
                 ->latest()
                 ->paginate(5);
 
 
-    $totalAmount = Outward::where('warehouse_id', $warehouseId)
-                    ->sum('total_amount');
-
-
-    $monthCount = Outward::where('warehouse_id', $warehouseId)
-                    ->whereBetween('date', [
-                        Carbon::now()->startOfMonth(),
-                        Carbon::now()->endOfMonth()
-                    ])
-                    ->count();
-
-    return view('outward.index', compact('outwards', 'totalAmount', 'monthCount'));
+  
+    return view('outward.index', compact('outwards'));
 }
 
 
@@ -188,6 +177,16 @@ public function show(Outward $outward){
 
 
 public function edit(outward $outward){
+
+
+
+
+
+
+
+
+
+    
         $ledgers = Ledger::where('type', 'customer')->get();
    
 
@@ -219,7 +218,7 @@ public function edit(outward $outward){
             $query->where('barcode', $barcode);
         })
         ->first();
-
+        
     if (!$inventory || !$inventory->item) {
         return response()->json(['message' => 'Item not found in this warehouse'], 404);
     }
@@ -241,7 +240,7 @@ public function update(Request $request, Outward $outward)
         'date' => 'required|date',
         'ledger_id' => 'required|exists:ledgers,id',
         'item_ids' => 'required|array',
-        'item_ids.*' => 'exists:items,id',
+        // 'item_ids.*' => 'exists:items,id',
         'quantities' => 'required|array',
         'quantities.*' => 'numeric|min:1',
         'rates' => 'required|array',
@@ -251,7 +250,6 @@ public function update(Request $request, Outward $outward)
     DB::beginTransaction();
 
     try {
-        // Update Outward main fields
         $outward->update([
             'date' => $request->date,
             'ledger_id' => $request->ledger_id,
@@ -290,10 +288,21 @@ public function update(Request $request, Outward $outward)
                 ]);
 
                 $item = Item::find($itemId);
-                if ($item && $difference != 0) {
+                // if ($item && $difference != 0) {
+                //     $item->decrement('current_stock', $difference);
+                // }
+
+  if ($item) {
+    $item->update([
+                           'price' => $rateNew, 
+                    ]);
+
+                      if ($difference != 0) {
                     $item->decrement('current_stock', $difference);
                 }
-                
+                }
+
+               
                 
                 $inventory = Inventory::firstOrCreate(
                     ['item_id' => $itemId, 'warehouse_id' => $warehouseId],
@@ -315,6 +324,9 @@ public function update(Request $request, Outward $outward)
 
                 $item = Item::find($itemId);
                 if ($item) {
+
+
+                    
                     $item->decrement('current_stock', $quantityNew);
                 }
 
@@ -333,14 +345,12 @@ public function update(Request $request, Outward $outward)
             $oldDetail = $oldDetails[$deletedItemId];
             $quantityOld = $oldDetail->quantity;
 
-            // Increment Item current_stock (because outward item removed)
             $item = Item::find($deletedItemId);
             if ($item) {
                 $item->increment('current_stock', $quantityOld);
             }
 
-            // Increment Inventory current_stock
-            $inventory = Inventory::where('item_id', $deletedItemId)
+           $inventory = Inventory::where('item_id', $deletedItemId)
                 ->where('warehouse_id', $warehouseId)
                 ->first();
 

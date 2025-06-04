@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class InwardDetail extends Model
 {
-      use HasFactory;
+    use HasFactory;
+
     protected $fillable = [
         'inward_id', 
         'item_id',
@@ -15,6 +16,7 @@ class InwardDetail extends Model
         'total_amount',
     ];
 
+    // Relationships
     public function inward()
     {
         return $this->belongsTo(Inward::class);
@@ -25,14 +27,22 @@ class InwardDetail extends Model
         return $this->belongsTo(Item::class);
     }
 
-    protected static function booted()
-{
-    static::saving(function ($detail) {
-        $detail->total_amount = $detail->quantity * $detail->price;
-    });
+     protected static function booted()
+    {
+        static::saving(function ($detail) {
+            $detail->total_amount = $detail->quantity * $detail->price;
+        });
 
-    static::saved(function ($detail) {
-        $detail->inward->updateTotals();
-    });
-}
+        static::saved(function ($detail) {
+            if ($detail->inward) {
+                $detail->inward->updateTotals();
+            }
+        });
+
+        static::deleted(function ($detail) {
+            if ($detail->inward) {
+                $detail->inward->updateTotals();
+            }
+        });
+    }
 }
