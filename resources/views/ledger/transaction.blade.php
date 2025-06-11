@@ -3,7 +3,8 @@
 @section('content')
 
 <div class="container mx-auto px-4 py-8">
-    <!-- Header Section -->
+    
+    
     <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
             <div>
         <h1 class="text-2xl font-bold text-gray-800 mb-2 md:mb-0">Ledgers Transactions</h1>
@@ -41,6 +42,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach ($transactions as $transaction)
                         @php
+
         $route = $ledger->type === 'customer'
             ? route('outwards.show', $transaction)
             : route('inwards.show', $transaction);
@@ -105,10 +107,10 @@
             </table>
         </div>
 
-        <!-- Pagination -->
+        {{-- <!-- Pagination -->
         <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
             {{ $transactions->links() }}
-        </div>
+        </div> --}}
     </div>
 </div>
 

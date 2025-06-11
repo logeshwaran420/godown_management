@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Inventory;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use App\Traits\CommonDataTrait;   
@@ -20,6 +21,7 @@ class ItemController extends Controller
 
     public function store(Request $request)
     {
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'barcode' => 'required|string|max:255|unique:items,barcode',
@@ -38,9 +40,12 @@ class ItemController extends Controller
         }
 
         $item = Item::create($validatedData);
+        
 
-        return redirect()->route('inventory.items.show', $item)
-                         ->with('success', 'Item created successfully!');
+     return response()->json([
+    'message' => 'Item created successfully!',
+    'item' => $item
+], 201);
     }
 
     public function findByBarcode($barcode)
@@ -55,7 +60,8 @@ class ItemController extends Controller
 
     public function show(Item $item)
     {
-        return view('inventory.items.show', compact('item'));
+         $commonData = $this->getCommonData();
+        return view('inventory.items.show', compact('item'), $commonData);
     }
 
     public function edit(Item $item)
@@ -71,6 +77,7 @@ class ItemController extends Controller
 
     public function update(Request $request, Item $item)
     {
+        
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'barcode' => 'required|string|max:255|unique:items,barcode,' . $item->id,
@@ -96,6 +103,50 @@ class ItemController extends Controller
         return redirect()->route('inventory.items.show', $item)
                          ->with('success', 'Item updated successfully!');
     }
+
+
+
+public function low(Request $request)
+{
+    $perPage = $request->input('per_page', 10);
+
+    
+  $warehouseId = session('warehouse_id');
+
+$inventories = Inventory::where('warehouse_id', $warehouseId)
+    ->where('current_stock', '<', 10)
+    ->latest()
+    ->paginate($perPage)
+    ->withQueryString();
+
+
+
+
+
+    $commonData = $this->getCommonData();
+
+
+
+  
+    return view('inventory.items.low', array_merge([
+        'inventories' => $inventories,
+        'perPage' => $perPage,
+    ], $commonData));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public function destroy(item $item){
         $item->delete();

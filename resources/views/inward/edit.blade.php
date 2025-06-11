@@ -56,8 +56,7 @@
                 </svg>
                 Inward Items
             </h3>
-            
-          
+
 
             <div class="overflow-x-auto rounded-lg border border-gray-200">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -87,7 +86,7 @@
                             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                                 {{ $detail->item->barcode }}
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
+                            <td class=" whitespace-nowrap">
                                 <select name="category_ids[]" class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}" {{ $category->id == $detail->item->category_id ? 'selected' : '' }}>
@@ -95,8 +94,9 @@
                                         </option>
                                     @endforeach
                                 </select>
+                              
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
+                            <td class=" whitespace-nowrap">
                                 <input type="text" name="item_names[]" value="{{ $detail->item->name }}"
                                     class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
                             </td>
@@ -183,6 +183,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const deleteBtn = document.getElementById("deleteSelectedBtn");
     const selectAllCheckbox = document.getElementById("selectAll");
     let slnoCounter = {{ $inward->details->count() + 1 }};
+
+
+
+     const categoryOptions = `{!! $categories->map(fn($c) => "<option value='{$c->id}'>{$c->name}</option>")->implode('') !!}`;
+    const unitOptions = `{!! $units->map(fn($u) => "<option value='{$u->id}'>{$u->abbreviation}</option>")->implode('') !!}`;
+
 
     function calculateTotals() {
         let totalQty = 0;
@@ -293,12 +299,14 @@ document.addEventListener("DOMContentLoaded", function () {
                             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                                 ${item.barcode}
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
+                            <td class="whitespace-nowrap">
                                 <select name="category_ids[]" class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
-                                    ${item.category ? `<option value="${item.category.id}" selected>${item.category.name}</option>` : '<option value="">Select</option>'}
+                              
+                                    ${categoryOptions.replace(`value="${item.category?.id}"`, `value="${item.category?.id}" selected`)}
                                 </select>
-                            </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
+
+                                </td>
+                            <td class="whitespace-nowrap">
                                 <input type="text" name="item_names[]" value="${item.name}" class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
@@ -307,9 +315,10 @@ document.addEventListener("DOMContentLoaded", function () {
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <input type="number" name="quantities[]" value="1" class="qtyInput w-20 border-gray-300 rounded-md text-sm px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500" min="1" data-rate="${item.price || 0}">
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
+                             <td class="whitespace-nowrap">
                                 <select name="unit_ids[]" class="w-full border-gray-300 rounded-md text-sm px-2 py-1 focus:border-blue-500 focus:ring-blue-500">
-                                    ${item.unit ? `<option value="${item.unit.id}" selected>${item.unit.name}</option>` : '<option value="">Select</option>'}
+                                  
+                                    ${unitOptions.replace(`value="${item.unit?.id}"`, `value="${item.unit?.id}" selected`)}
                                 </select>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
@@ -377,3 +386,5 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </script>
 @endsection
+
+

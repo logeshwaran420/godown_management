@@ -1,42 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse Management System | Login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                        },
-                        secondary: {
-                            500: '#64748b',
-                            600: '#475569',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Warehouse Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  @vite(["resources/css/app.css","resources/js/app.js"])
+  @livewireStyles
 </head>
-<body class="min-h-screen bg-gray-50 flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')] bg-cover bg-center bg-blend-overlay bg-primary-100">
-   
 
-
-- <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl flex flex-col md:flex-row w-full max-w-5xl overflow-hidden animate__animated animate__fadeIn">
-       <!-- Image Section -->
+<body class="bg-gradient-to-br from-purple-900 via-indigo-800 to-blue-900 min-h-screen flex items-center justify-center px-4 py-8">
+  <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl flex flex-col md:flex-row w-full max-w-5xl overflow-hidden animate__animated animate__fadeIn">
+    <!-- Image Section -->
     <div class="w-full md:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-blue-600 to-indigo-700">
       <div class="text-center text-white">
         <img src="{{ asset('/storage/media/box.jpg') }}" alt="Warehouse" class="max-h-80 mx-auto mb-6 rounded-lg shadow-lg" />
@@ -48,11 +24,11 @@
     <!-- Form Section -->
     <div class="w-full md:w-1/2 p-10">
       <div class="flex flex-col items-center mb-8">
-        {{-- <div class="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-           <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                    </svg>
-        </div> --}}
+        <div class="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20" />
+          </svg>
+        </div>
         <h2 class="text-3xl font-bold text-gray-800">Welcome Back</h2>
         <p class="text-gray-500 mt-2">Sign in to your account</p>
       </div>
@@ -120,7 +96,7 @@
         </div>
         
         <!-- Remember Me & Forgot Password -->
-        {{-- <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between">
           <div class="flex items-center">
             <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
             <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
@@ -128,7 +104,7 @@
           <div class="text-sm">
             <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Forgot password?</a>
           </div>
-        </div> --}}
+        </div>
         
         <!-- Submit Button -->
         <button type="submit"
@@ -138,16 +114,12 @@
       </form>
       
       <!-- Footer Links -->
-      {{-- <div class="mt-6 text-center text-sm">
+      <div class="mt-6 text-center text-sm">
         <p class="text-gray-500">Don't have an account? 
           <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Contact admin</a>
         </p>
-      </div> --}}
+      </div>
     </div>
   </div>
 </body>
-
-
-
-
 </html>

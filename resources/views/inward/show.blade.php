@@ -42,15 +42,20 @@
                 </div>
             </div>
 
-            <div class="bg-gray-50 p-4 rounded-lg">
-                <label class="block text-sm font-medium text-gray-500 mb-1">Supplier</label>
-                <div class="text-lg font-semibold text-gray-800 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 12.094A5.973 5.973 0 004 15v1H1v-1a3 3 0 013.75-2.906z" />
-                    </svg>
-                    {{ $inward->ledger->name }}
-                </div>
-            </div>
+           <a href="{{ route('ledgers.show', $inward->ledger->id) }}" class="block hover:bg-gray-100 transition-colors duration-150">
+    <div class="bg-gray-50 p-4 rounded-lg cursor-pointer">
+        <label class="block text-sm font-medium text-gray-500 mb-1">Supplier</label>
+        <div class="text-lg font-semibold text-gray-800 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 12.094A5.973 5.973 0 004 15v1H1v-1a3 3 0 013.75-2.906z" />
+            </svg>
+            {{ $inward->ledger->name }}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </div>
+    </div>
+</a>
 
             <div class="bg-gray-50 p-4 rounded-lg">
                 <label class="block text-sm font-medium text-gray-500 mb-1">Total Items</label>

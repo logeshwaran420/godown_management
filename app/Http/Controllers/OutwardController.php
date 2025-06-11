@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Inventory;
+use App\Models\Inward;
 use App\Models\Item;
 use App\Models\Ledger;
 use App\Models\Outward;
@@ -17,18 +18,21 @@ use Validator;
 
 class OutwardController extends Controller
 {
-    public function index()
+public function index(Request $request)
 {
+    $perPage = $request->input('per_page', 10); 
     $warehouseId = session('warehouse_id');
-    
+
     $outwards = Outward::with(['ledger', 'details.item.unit'])
                 ->where('warehouse_id', $warehouseId)
                 ->latest()
-                ->paginate(5);
+                ->paginate($perPage)
+                ->withQueryString(); 
 
-
-  
-    return view('outward.index', compact('outwards'));
+    return view('outward.index', [
+        'outwards' => $outwards,
+        'perPage' => $perPage,
+    ]);
 }
 
 
@@ -39,7 +43,8 @@ class OutwardController extends Controller
 
 
 
-public function create()
+
+public function create(request $request)
 {
     $warehouseId = session('warehouse_id'); 
     $warehouse = Warehouse::findOrFail($warehouseId);
@@ -63,12 +68,20 @@ public function create()
     
     $ledgers = Ledger::where('type', 'customer')->get();
 
+      $selectedLedger = null;
+    if ($request->has('ledger')) {
+        $selectedLedger = Ledger::find($request->ledger);
+    }
+
+
+
     return view('outward.create', 
-     compact('ledgers', 'items')
+     compact('ledgers', 'items','selectedLedger')
 );
 }
 public function store(Request $request)
 {
+ 
    $validator = Validator::make($request->all(), [
          'date' => 'required|date',
         'ledger_id' => 'required|exists:ledgers,id',
@@ -176,6 +189,12 @@ public function show(Outward $outward){
 }
 
 
+
+
+
+
+
+
 public function edit(outward $outward){
 
 
@@ -196,17 +215,14 @@ public function edit(outward $outward){
 
 
 
-
-
-
-
      public function search($query)
     {
-        $ledgers = Ledger::where('type', 'customer')
+       
+        $ledgers = Ledger::whereIn('type', ['customer', 'both'])
             ->where('name', 'LIKE', "%{$query}%")
             ->get(['id', 'name']);
-
-        return response()->json($ledgers);
+            
+            return response()->json($ledgers);
     }
 
     public function findByBarcode($barcode){
@@ -228,7 +244,6 @@ public function edit(outward $outward){
 
     return response()->json($item);
 }
-
 
 
 
@@ -369,6 +384,9 @@ public function update(Request $request, Outward $outward)
         return back()->withErrors(['error' => 'Failed to update outward: ' . $e->getMessage()]);
     }
 }
+
+
+
 
 
 }

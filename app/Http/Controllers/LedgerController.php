@@ -7,20 +7,25 @@ use Illuminate\Http\Request;
 
 class LedgerController extends Controller
 {
- public function index()
+    
+    
+    public function index(Request $request)
 {
+    $perPage = $request->input('per_page', 10);
+    $type = $request->input('type', 'all');
+    
     $query = Ledger::query();
-
-    $type = request('type');
-
-    if ($type && $type !== 'all') {
+    
+    if ($type !== 'all') {
         $query->where('type', $type);
     }
-
-    $ledgers = $query->latest()->paginate(7);
-
-    return view('ledger.index', compact('ledgers'));
+    
+    $ledgers = $query->paginate($perPage);
+    
+    return view('ledger.index', compact('ledgers', 'perPage'));
 }
+
+
 
 
     public function create(){
@@ -29,14 +34,17 @@ class LedgerController extends Controller
 
       public function store(Request $request)
     {
-     
+    
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:10',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
-            'type' => 'required|in:supplier,customer',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'country' => 'nullable|string|max:100',
+            'type' => 'required|in:supplier,customer,both',
         ]);
 
         Ledger::create($validated);
@@ -56,7 +64,10 @@ class LedgerController extends Controller
         'phone' => 'nullable|string|max:20',
         'email' => 'nullable|email|max:255',
         'address' => 'nullable|string|max:500',
-        'type' => 'required|in:supplier,customer',
+        'city' => 'nullable|string|max:100',
+        'state' => 'nullable|string|max:100',
+        'country' => 'nullable|string|max:100',
+        'type' => 'required|in:supplier,customer,both',
     ]);
 
     $ledger->update($validated);
@@ -81,8 +92,13 @@ class LedgerController extends Controller
         $transactions = $ledger->outwards()->latest()->paginate(10);
     } elseif ($ledger->type === 'supplier') {
         $transactions = $ledger->inwards()->latest()->paginate(10); 
-    } else {
-        $transactions = collect()->paginate(10); 
+        
+    } elseif ($ledger->type === 'both') {
+        $transactions = $ledger->inwards()->latest()->paginate(10); 
+        
+    } 
+    else {
+         $transactions = collect()->paginate(10); 
 
     }
    

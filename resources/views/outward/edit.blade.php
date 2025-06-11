@@ -103,7 +103,7 @@ $warehouseId = session('warehouse_id');
                            <td class="px-4 py-3 whitespace-nowrap">
     <input type="number" name="quantities[]" value="{{ $detail->quantity }}"
         class="qtyInput w-20 border-gray-300 rounded-md text-sm px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500"
-        min="1" data-rate="{{ $detail->item->price }}" data-current-stock="{{ $stock }}">
+     data-rate="{{ $detail->item->price }}" data-current-stock="{{ $stock }}">
 </td>
 
                             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
@@ -303,7 +303,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             <td class="px-4 py-3 text-sm">${data.name}</td>
                             <td class="px-4 py-3 text-sm">${data.hsn_code || ''}</td>
                             <td class="px-4 py-3">
-                                <input type="number" name="quantities[]" value="1" min="1"
+                                <input type="number" name="quantities[]" value="1"
                                     class="qtyInput w-20 border-gray-300 rounded-md text-sm px-2 py-1 text-center focus:border-blue-500 focus:ring-blue-500"
                                     data-rate="${data.price || 0}" data-current-stock="${data.current_stock || 0}">
                             </td>

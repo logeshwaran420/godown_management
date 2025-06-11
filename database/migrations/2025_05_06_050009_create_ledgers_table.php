@@ -12,14 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ledgers', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('phone')->nullable();
-            $table->string('email')->nullable();
-            $table->text('address')->nullable();
-            $table->enum('type', ['supplier', 'customer']);
-            $table->timestamps();
-        });
+    $table->id();
+    $table->string('name');
+    $table->string('phone')->nullable();
+    $table->string('email')->nullable();
+    $table->string('address')->nullable();
+    $table->string('city')->nullable();
+    $table->string('state')->nullable();
+    $table->string('country')->nullable()->default('India');
+    $table->enum('type', ['supplier', 'customer', 'both']);
+    $table->timestamps();
+});
+
         
     }
 

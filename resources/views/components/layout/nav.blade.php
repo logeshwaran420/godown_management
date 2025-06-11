@@ -3,7 +3,6 @@
     <nav class="w-full max-w-xs mx-4 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl"
          x-data="{ inventory: {{ request()->routeIs('inventory.*') ? 'true' : 'false' }} }">
 
-        <!-- Home Link -->
         <x-layout.nav-link href="{{ route('home') }}" :active="request()->routeIs('home')" class="group nav-item mt-3">
             <div class="flex items-center space-x-2 p-2 rounded-lg transition-all duration-200">
                 <div class="icon-container bg-blue-500/10 p-1.5 rounded-md">
@@ -16,12 +15,12 @@
             </div>
         </x-layout.nav-link>
 
-        <!-- Inventory Dropdown -->
         <div>
             <button
                 @click="inventory = !inventory"
-                class="w-full flex justify-between items-center p-2 rounded-lg hover:bg-white/5 transition-all duration-200 nav-item {{ request()->routeIs('inventory.*') ? 'bg-white/5' : '' }}">
-                <div class="flex items-center space-x-2">
+                class="w-full flex justify-between items-center p-2 rounded-lg hover:bg-white/5 transition-all duration-200 nav-item 
+                {{ request()->routeIs('inventory.*') ? 'bg-white/5' : '' }}">
+                <div class="flex items-center space-x-2 p-2 rounded-md">
                     <div class="icon-container bg-purple-500/10 p-1.5 rounded-md">
                         <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -53,7 +52,7 @@
             </div>
         </div>
 
-        <!-- Reusable Nav Items -->
+
         @php
             $navItems = [
                 ['route' => 'inwards', 'label' => 'Inward', 'icon' => 'M19 13l-7 7-7-7m14-8l-7 7-7-7', 'color' => 'green'],
@@ -66,7 +65,7 @@
         @foreach ($navItems as $item)
             <x-layout.nav-link href="{{ route($item['route']) }}" :active="request()->routeIs($item['route'] . '*')" class="nav-item">
                 <div class="flex items-center space-x-2 p-2 rounded-lg transition-all duration-200">
-                    <div class="icon-container bg-{{ $item['color'] }}-500/10 p-1.5 rounded-md">
+                    <div class="icon-container bg-{{ $item['color'] }}-500/10 p-2 rounded-md">
                         <svg class="w-4 h-4 text-{{ $item['color'] }}-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
                         </svg>
@@ -76,8 +75,10 @@
             </x-layout.nav-link>
         @endforeach
 
-        <!-- Style -->
-        <style>
+        
+      
+
+         <style>
             .nav-item.active {
                 background-color: rgba(255, 255, 255, 0.05);
                 box-shadow: inset 3px 0 0 0 #3b82f6;

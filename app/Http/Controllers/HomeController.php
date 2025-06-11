@@ -68,6 +68,8 @@ class HomeController extends Controller
         return Carbon::parse($outward->date)->isToday();
     })->sum('total_quantity');
 
+
+  
      $data = $this->getCommonData();
  
  
@@ -83,6 +85,7 @@ class HomeController extends Controller
         'inventoryValue' => $inventoryValue,
         'todayInwards' => $todayInwards,
         'todayOutwards' => $todayOutwards,
+     
     ]);
   
 

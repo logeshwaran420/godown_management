@@ -21,7 +21,11 @@ class LedgerFactory extends Factory
             'phone' => $this->faker->phoneNumber,
             'email' => $this->faker->unique()->email,
             'address' => $this->faker->address,
-            'type' => $this->faker->randomElement(['Supplier', 'Customer']),
+            'city' => $this->faker->city,
+            'state' => $this->faker->state,
+            'country' => 'India',
+
+            'type' => $this->faker->randomElement(['Supplier', 'Customer','Both']),
         ];
     }
 }

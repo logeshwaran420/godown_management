@@ -29,7 +29,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ledger Name</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                        
@@ -97,10 +97,66 @@
             </table>
         </div>
 
-        {{-- <!-- Pagination -->
-        <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-            {{ $outwards->links() }}
-        </div> --}}
+        @if($outwards->hasPages())
+          <div class="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <!-- Items per page selector -->
+    <div class="flex items-center mb-4 sm:mb-0">
+        <span class="text-sm text-gray-700 dark:text-gray-300 mr-2">Items per page:</span>
+        <select onchange="window.location.href = this.value" 
+                class="text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @foreach ([5, 10, 25, 50, 100] as $size)
+                <option value="{{ request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]) }}" 
+                        {{ $perPage == $size ? 'selected' : '' }}>
+                    {{ $size }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <!-- Pagination links -->
+     <div class="flex items-center space-x-1">
+       
+        <a href="{{ $outwards->url(1) }}" 
+           class="px-3 py-1 rounded-md text-sm font-medium {{ $outwards->currentPage() == 1 ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+            &laquo;
+        </a>
+
+        <a href="{{ $outwards->previousPageUrl() }}" 
+           class="px-3 py-1 rounded-md text-sm font-medium {{ $outwards->onFirstPage() ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+            &lsaquo;
+        </a>
+
+      
+        @foreach ($outwards->getUrlRange(max(1, $outwards->currentPage() - 2), min($outwards->lastPage(), $outwards->currentPage() + 2)) as $page => $url)
+            <a href="{{ $url }}" 
+               class="px-3 py-1 rounded-md text-sm font-medium {{ $page == $outwards->currentPage() ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+                {{ $page }}
+            </a>
+        @endforeach
+
+        <!-- Next Page Link -->
+        <a href="{{ $outwards->nextPageUrl() }}" 
+           class="px-3 py-1 rounded-md text-sm font-medium {{ !$outwards->hasMorePages() ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+            &rsaquo;
+        </a>
+
+        <!-- Last Page Link -->
+        <a href="{{ $outwards->url($outwards->lastPage()) }}" 
+           class="px-3 py-1 rounded-md text-sm font-medium {{ $outwards->currentPage() == $outwards->lastPage() ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+            &raquo;
+        </a>
+    </div>
+
+    <!-- Showing results info -->
+    <div class="text-sm text-gray-700 dark:text-gray-300 mt-4 sm:mt-0">
+        Showing <span class="font-medium">{{ $outwards->firstItem() }}</span> to 
+        <span class="font-medium">{{ $outwards->lastItem() }}</span> of 
+        <span class="font-medium">{{ $outwards->total() }}</span> results
+    </div>
+
+    </div>
+
+    @endif
     </div>
 </div>
 

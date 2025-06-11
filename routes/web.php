@@ -15,8 +15,6 @@ use App\Models\Item;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/search', [SearchController::class, 'index'])->name('search');
-
 
 Route::middleware('auth')->group(function () {
 Route::get('/', function () {
@@ -29,9 +27,11 @@ Route::get('/',[HomeController::class,"index"])->name('home');
 
 Route::prefix('/inventory')->name('inventory.')->group(function () {
 
-Route::get('/items',[InventoryController::class,"items"])->name('items');
-  
 
+Route::get('/items',[InventoryController::class,"items"])->name('items');
+
+
+Route::get('/items/low',[ItemController::class,"low"])->name('items.low');
 Route::get('/items/create',[ItemController::class,"create"])->name('items.create');
   Route::post('/items/store',[ItemController::class,"store"])->name('items.store');
  Route::delete('/items/delete',[ItemController::class,"delete"])->name('items.delete');
@@ -39,6 +39,7 @@ Route::get('/items/create',[ItemController::class,"create"])->name('items.create
 Route::get('/items/edit/{item}',[ItemController::class,"edit"])->name('items.edit');
 Route::put('/items/update/{item}',[ItemController::class,"update"])->name('items.update');
 Route::delete('/items/destroy/{item}',[ItemController::class,"destroy"])->name('items.destroy');
+
 
 
 
@@ -60,8 +61,8 @@ Route::delete('/categories/destroy/{category}',[CategoryController::class,"destr
 
 Route::prefix('/inwards')->group(function(){
 
- Route::get('/',[InwardController::class,'index'])->name('inwards');
- Route::get('/create',[InwardController::class,'create'])->name('inwards.create');
+  Route::get('/',[InwardController::class,'index'])->name('inwards');
+  Route::get('/create',[InwardController::class,'create'])->name('inwards.create');
  Route::post('/store',[InwardController::class,'store'])->name('inwards.store');
  Route::get('/show/{inward}',[InwardController::class,'show'])->name('inwards.show');
  Route::get('/edit/{inward}',[InwardController::class,'edit'])->name('inwards.edit');
@@ -108,6 +109,28 @@ Route::put("/update/{movement}",[MovementController::class,"update"])->name("mov
      
 });
 
+
+
+Route::get('/search', [SearchController::class, 'index'])->name('search');
+
+
+
+Route::get('/supplier/{ledger}', [InwardController::class, 'search']);
+Route::get('/inward/{barcode}', [InwardController::class, 'findByBarcode']);
+
+
+
+Route::get('/outward/{barcode}', [OutwardController::class, 'findByBarcode']);
+Route::get('/customer/{query}', [OutwardController::class, 'search']);
+
+Route::get('outward/{outward}', [OutwardController::class, 'graph']);
+
+
+Route::get('/graph', [InventoryController::class, 'graph'])->name('graph');
+
+
+
+
 });
 
 
@@ -123,14 +146,6 @@ Route::get('/test', function () {
     return view("test",compact('items'));
 });
 
-
-Route::get('/supplier/{ledger}', [InwardController::class, 'search']);
-Route::get('/inward/{barcode}', [InwardController::class, 'findByBarcode']);
-
-
-
-Route::get('/outward/{barcode}', [OutwardController::class, 'findByBarcode']);
-Route::get('/customer/{query}', [OutwardController::class, 'search']);
 
 
 

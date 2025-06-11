@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('state')->nullable();
             $table->string('postal_code')->nullable();
-            $table->string('country')->nullable();
+             $table->string('country')->nullable()->default('India');
             $table->string('phone')->nullable();
             $table->timestamps();
         });

@@ -19,7 +19,7 @@ class SearchController extends Controller
         }
 
         if ($type === 'ledger') {
-            $results = Ledger::where('name', 'LIKE', '%' . $query . '%')->get(['id', 'name']);
+            $results = Ledger::where('name', 'LIKE', '%' . $query . '%')->get(['id', 'name', 'type']);
         } elseif ($type === 'item') {
             $results = Item::where('name', 'LIKE', '%' . $query . '%')->get(['id', 'name']);
         } elseif ($type === 'category') {

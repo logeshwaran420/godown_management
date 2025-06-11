@@ -23,8 +23,9 @@ class WarehouseFactory extends Factory
             'city' => $this->faker->city,
             'state' => $this->faker->state,
             'postal_code' => $this->faker->postcode,
-            'country' => $this->faker->country,
-            'phone' => $this->faker->phoneNumber, // Optional: realistic image
+          'country' => 'India',
+
+              'phone' => $this->faker->phoneNumber, 
         ];
         
     }

@@ -17,24 +17,26 @@ use Validator;
 
 class InwardController extends Controller
 {
-    public function index(){
-          $warehouseId = session('warehouse_id');
+   public function index(Request $request)
+{
+   
+    $perPage = $request->input('per_page', 10); // Default to 10 if not specified
+    $warehouseId = session('warehouse_id');
 
     $inwards = Inward::where('warehouse_id', $warehouseId)
                     ->latest()
-                    ->paginate(5);
+                    ->paginate($perPage)
+                    ->withQueryString();
+                    
+    return view('inward.index', [
+        'inwards' => $inwards,
+        'perPage' => $perPage,
+    ]);
+}
 
-                       
+    public function create(request $request){
 
-
-
-
-
-        return view('inward.index',compact('inwards'));
-    }
-
-    public function create(){
-
+     
         $categories = Category::all();
         $units = Unit::all();
         $warehouseId = session('warehouse_id'); 
@@ -44,22 +46,29 @@ class InwardController extends Controller
         ->with('item.category', 'item.unit')
         ->get();
 
-
-    // $items = $inventories->map(function($inventory) {
-    //     $item = $inventory->item;
-    //     if ($item) {
-    //         $item->current_stock = $inventory->current_stock; 
-    //     }
-    //     return $item;
-    // })->filter()->values();
     $items = item::all();
 
 
     $ledgers = Ledger::where('type', 'supplier')->get();
+    
+     $selectedLedger = null;
+    if ($request->has('ledger')) {
+        $selectedLedger = Ledger::find($request->ledger);
+    }
+    
+    $selectedItem = null;
+if ($request->has('item')) {
+    $selectedItem = Item::with('category', 'unit')->find($request->item); 
+}
+
+
+
 
         return view('inward.create'
-        ,compact('ledgers','items','categories','units')
+        ,compact('ledgers','items','categories','units','selectedLedger','selectedItem')
     );
+
+
     }
 
 
@@ -81,7 +90,6 @@ public function store(Request $request)
     ]);
 
     DB::beginTransaction();
-
     try {
         $inward = Inward::create([
             'date' => $request->date,
@@ -163,9 +171,10 @@ public function edit(inward $inward){
 
     public function search($ledger)
 {
-    return Ledger::where('type', 'supplier')
-                 ->where('name', 'LIKE', "%{$ledger}%")
-                 ->get(['id', 'name']);
+ return Ledger::whereIn('type', ['supplier', 'both'])
+             ->where('name', 'LIKE', "%{$ledger}%")
+             ->get(['id', 'name']);
+
 }
 
 
@@ -173,23 +182,27 @@ public function update(Request $request, Inward $inward)
 {
     $warehouseId = session('warehouse_id');
 
+ 
     $validated = $request->validate([
         'date' => 'required|date',
         'ledger_id' => 'required|exists:ledgers,id',
         'item_ids' => 'required|array',
+         'item_ids.*' => 'exists:items,id',
         'quantities' => 'required|array',
-        'quantities.*' => 'numeric|min:1',
-        'rates' => 'required|array',
-        'rates.*' => 'numeric|min:0',
-        'category_ids' => 'required|array',
-        'category_ids.*' => 'exists:categories,id',
-        'unit_ids' => 'required|array',
-        'unit_ids.*' => 'exists:units,id',
-        'item_names' => 'required|array',
+         'quantities.*' => 'numeric|min:1',
+         'rates' => 'required|array',
+         'rates.*' => 'numeric|min:0',
+         'category_ids' => 'required|array',
+         'category_ids.*' => 'exists:categories,id',
+         'unit_ids' => 'required|array',
+         'unit_ids.*' => 'exists:units,id',
+          'item_names' => 'required|array',
         'item_names.*' => 'string|max:255',
-        'hsn_codes' => 'required|array',
-        'hsn_codes.*' => 'string|max:255',
+         'hsn_codes' => 'required|array',
+         'hsn_codes.*' => 'string|max:255',
     ]);
+  
+
 
     DB::beginTransaction();
 
@@ -218,7 +231,7 @@ public function update(Request $request, Inward $inward)
         }
 
         $processedItemIds = [];
-
+        
         foreach ($newItems as $itemId => $data) {
             $quantityNew = $data['quantity'];
             $rateNew = $data['rate'];
@@ -246,7 +259,8 @@ public function update(Request $request, Inward $inward)
                         'unit_id' => $unitId,
                         'name' => $itemName,
                         'hsn_code' => $hsnCode,
-                        'price' => $rateNew, 
+                        'price' => $rateNew,
+
                     ]);
 
                     if ($difference != 0) {
@@ -318,6 +332,7 @@ public function update(Request $request, Inward $inward)
         }
 
         DB::commit();
+
 
         return redirect()->route('inwards.show', compact('inward'))->with('success', 'Inward updated successfully.');
     } catch (\Exception $e) {

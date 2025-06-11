@@ -6,21 +6,30 @@
     <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Ledger Accounts</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Manage your financial accounts and contacts</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Manage your Ledgers accounts and contacts</p>
         </div>
         <div class="flex items-center gap-3">
-            {{-- <div class="relative">
-                <input type="text" placeholder="Search ledgers..." class="pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-                <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                </svg>
-            </div> --}}
-            <a href="{{ route('ledgers.create') }}" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                </svg>
-                <span>New Ledger</span>
-            </a>
+          <div class="relative">
+    <input type="text" id="ledgerSearchInput" placeholder="Search ledgers..."
+        class="pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+    <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+        fill="currentColor">
+        <path fill-rule="evenodd"
+            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+            clip-rule="evenodd" />
+    </svg>
+    <ul id="ledgerSuggestions"
+        class="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-md max-h-60 overflow-y-auto hidden">
+    </ul>
+</div>
+
+             <button type="button"id="ledgeropenModalBtn" 
+                    class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors shadow-md hover:shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    New Ledger
+                </button>
         </div>
     </div>
 
@@ -33,13 +42,20 @@
                     All
                 </a>
             </li>
+              <li class="me-2">
+                <a href="{{ request()->fullUrlWithQuery(['type' => 'both']) }}" 
+                   class="inline-block p-4 border-b-2 rounded-t-lg {{ request('type') == 'both' ? 'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300' }}">
+                    Both
+                </a>
+            </li>
             <li class="me-2">
                 <a href="{{ request()->fullUrlWithQuery(['type' => 'customer']) }}" 
                    class="inline-block p-4 border-b-2 rounded-t-lg {{ request('type') == 'customer' ? 'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300' }}">
                     Customers
                 </a>
             </li>
-            <li class="me-2">
+          
+             <li class="me-2">
                 <a href="{{ request()->fullUrlWithQuery(['type' => 'supplier']) }}" 
                    class="inline-block p-4 border-b-2 rounded-t-lg {{ request('type') == 'supplier' ? 'border-blue-600 text-blue-600 dark:text-blue-500 dark:border-blue-500' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300' }}">
                     Suppliers
@@ -49,97 +65,677 @@
         </ul>
     </div>
 
-    <!-- Table Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-700">
-                    <tr >
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Name
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Type
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Contact
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Actions
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    @foreach ($ledgers as $ledger)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                                    <span class="text-blue-600 dark:text-blue-300 font-medium">
-                                        {{ substr($ledger->name, 0, 1) }}
-                                    </span>
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white hover:underline cursor-pointer dark:text-black-400"  onclick="window.location='{{ route('ledgers.show', $ledger) }}'">
-                                        {{ $ledger->name }}
-                                    </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $ledger->email ?? 'No email' }}
-                                    </div>
-                                </div>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                        <div class="flex items-center">
+                            <span>Name</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                            </svg>
+                        </div>
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                        Type
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                        Contact
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                @foreach ($ledgers as $ledger)
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer" onclick="window.location='{{ route('ledgers.show', $ledger) }}'">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center shadow-inner">
+                                <span class="text-blue-600 dark:text-blue-300 font-medium uppercase">
+                                    {{ substr($ledger->name, 0, 1) }}
+                                </span>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @php
-                                $typeColors = [
-                                    'customer' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-                                    'supplier' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-                                ];
-                                $colorClass = $typeColors[strtolower($ledger->type)] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-                            @endphp
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $colorClass }}">
-                                {{ ucfirst($ledger->type) }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900 dark:text-white">{{ $ledger->phone }}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $ledger->address ?? 'No address' }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex items-center justify-end space-x-3">
-                                <a href="{{ route('ledgers.edit', $ledger) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                    </svg>
-                                    Edit
-                                </a>
-                                <form action="{{ route('ledgers.destory', $ledger) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this ledger?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            <div class="ml-4">
+                                <div class="text-sm font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-300 transition-colors">
+                                    {{ $ledger->name }}
+                                    @if($ledger->email)
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                         </svg>
-                                        Delete
-                                    </button>
-                                </form>
+                                    @endif
+                                </div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">
+                                    {{ $ledger->email ?? 'No email provided' }}
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="bg-white dark:bg-gray-800 px-4 py-3  justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
-       
-               
-                <div>
-                    {{ $ledgers->appends(request()->query())->links() }}
-                </div>
-            </div>
-        </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @php
+                            $typeColors = [
+                                'customer' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                'supplier' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+                                'both' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                            ];
+                            $colorClass = $typeColors[strtolower($ledger->type)] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                        @endphp
+                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $colorClass }} capitalize">
+                            {{ strtolower($ledger->type) }}
+                            @if(strtolower($ledger->type) === 'customer')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            @elseif(strtolower($ledger->type) === 'supplier')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                            @else
+                                <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                                </svg>
+                            @endif
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $ledger->phone ?? 'N/A' }}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs mt-1">
+                            {{ $ledger->address ?? 'No address provided' }}
+                        </div>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
+
+    <div class="flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <!-- Items per page selector -->
+    <div class="flex items-center mb-4 sm:mb-0">
+        <span class="text-sm text-gray-700 dark:text-gray-300 mr-2">Items per page:</span>
+        <select onchange="window.location.href = this.value" 
+                class="text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            @foreach ([5, 10, 25, 50, 100] as $size)
+                <option value="{{ request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]) }}" 
+                        {{ $perPage == $size ? 'selected' : '' }}>
+                    {{ $size }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <!-- Pagination links -->
+     <div class="flex items-center space-x-1">
+       
+        <a href="{{ $ledgers->url(1) }}" 
+           class="px-3 py-1 rounded-md text-sm font-medium {{ $ledgers->currentPage() == 1 ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+            &laquo;
+        </a>
+
+        <a href="{{ $ledgers->previousPageUrl() }}" 
+           class="px-3 py-1 rounded-md text-sm font-medium {{ $ledgers->onFirstPage() ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+            &lsaquo;
+        </a>
+
+      
+        @foreach ($ledgers->getUrlRange(max(1, $ledgers->currentPage() - 2), min($ledgers->lastPage(), $ledgers->currentPage() + 2)) as $page => $url)
+            <a href="{{ $url }}" 
+               class="px-3 py-1 rounded-md text-sm font-medium {{ $page == $ledgers->currentPage() ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+                {{ $page }}
+            </a>
+        @endforeach
+
+        <!-- Next Page Link -->
+        <a href="{{ $ledgers->nextPageUrl() }}" 
+           class="px-3 py-1 rounded-md text-sm font-medium {{ !$ledgers->hasMorePages() ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+            &rsaquo;
+        </a>
+
+        <!-- Last Page Link -->
+        <a href="{{ $ledgers->url($ledgers->lastPage()) }}" 
+           class="px-3 py-1 rounded-md text-sm font-medium {{ $ledgers->currentPage() == $ledgers->lastPage() ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700' }}">
+            &raquo;
+        </a>
+    </div>
+
+    <!-- Showing results info -->
+    <div class="text-sm text-gray-700 dark:text-gray-300 mt-4 sm:mt-0">
+        Showing <span class="font-medium">{{ $ledgers->firstItem() }}</span> to 
+        <span class="font-medium">{{ $ledgers->lastItem() }}</span> of 
+        <span class="font-medium">{{ $ledgers->total() }}</span> results
+    </div>
+
+    </div>
+
+
+
 </div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+
+<x-ledger.create-model />
+
+
+</div>
+
+
+
+{{-- <script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const openModalBtn = document.getElementById('openModalBtn');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const form = document.getElementById('create-item-form');
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+    const imagePlaceholder = document.getElementById('imagePlaceholder');
+    const removeImageBtn = document.getElementById('removeImageBtn');
+    const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
+    const barcodeInput = document.getElementById('barcode');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const spinner = document.getElementById('spinner');
+
+    // Open/Close modal
+    function openModal() {
+        modalOverlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modalOverlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        resetForm();
+    }
+
+    function resetForm() {
+        form.reset();
+        imagePreview.src = '';
+        imagePreview.style.display = 'none';
+        imagePlaceholder.style.display = 'block';
+        removeImageBtn.style.display = 'none';
+        
+        // Clear all error messages
+        document.querySelectorAll('[id^="error_"]').forEach(el => {
+            el.textContent = '';
+        });
+    }
+
+    openModalBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+  
+    // Generate random barcode
+    generateBarcodeBtn.addEventListener('click', function () {
+        const randomBarcode = 'BC' + Math.floor(100000000 + Math.random() * 900000000);
+        barcodeInput.value = randomBarcode;
+    });
+
+    // Image preview and validation
+    imageInput.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        const errorSpan = document.getElementById('error_image');
+
+        if (file) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                errorSpan.textContent = 'Only JPG, PNG or GIF images are allowed';
+                imageInput.value = '';
+                return;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                errorSpan.textContent = 'Image size must be less than 2MB';
+                imageInput.value = '';
+                return;
+            }
+
+            errorSpan.textContent = '';
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                imagePlaceholder.style.display = 'none';
+                removeImageBtn.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    removeImageBtn.addEventListener('click', function () {
+        imageInput.value = '';
+        imagePreview.src = '';
+        imagePreview.style.display = 'none';
+        imagePlaceholder.style.display = 'block';
+        removeImageBtn.style.display = 'none';
+        document.getElementById('error_image').textContent = '';
+    });
+
+    // Form submission
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        // Clear previous errors
+        document.querySelectorAll('[id^="error_"]').forEach(el => {
+            el.textContent = '';
+        });
+        
+        // Show loading state
+        submitText.textContent = 'Saving...';
+        spinner.classList.remove('hidden');
+        submitBtn.disabled = true;
+        
+        // Prepare form data
+        const formData = new FormData(form);
+        
+        // Submit via fetch API
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                
+
+                
+            // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        }
+        })
+        .then(response => {
+    if (!response.ok) {
+        return response.json().then(err => { throw err; });
+    }
+    return response.json();
+})
+
+        .then(data => {
+           
+            resetForm();
+            closeModal();
+            alert('Item added successfully!');
+            
+        })
+        .catch(error => {
+            if (error.errors) {
+                Object.entries(error.errors).forEach(([field, messages]) => {
+                    const errorElement = document.getElementById(`error_${field}`);
+                    if (errorElement) {
+                        errorElement.textContent = messages.join(' ');
+                    }
+                });
+            } else {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        })
+        .finally(() => {
+            // Reset button state
+            submitText.textContent = 'Save Item';
+            spinner.classList.add('hidden');
+            submitBtn.disabled = false;
+        });
+    });
+
+   modalOverlay.addEventListener('click', function (e) {
+        if (e.target === modalOverlay) {
+            closeModal();
+        }
+    });
+});
+</script>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    const countryDropdown = document.getElementById('country');
+    const stateDropdown = document.getElementById('state');
+    const cityDropdown = document.getElementById('city');
+
+    const defaultCountry = 'India';
+   const defaultstate = 'Tamil Nadu'; 
+
+
+
+    fetch('https://countriesnow.space/api/v0.1/countries/positions')
+        .then(res => res.json())
+        .then(data => {
+            data.data.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.name;
+                option.textContent = country.name;
+                if (country.name === defaultCountry) {
+                    option.selected = true;
+                }
+                countryDropdown.appendChild(option);
+            });
+
+            const event = new Event('change');
+            countryDropdown.dispatchEvent(event);
+        });
+
+    // Country change → load states
+    countryDropdown.addEventListener('change', function () {
+        const selectedCountry = this.value;
+        // stateDropdown.innerHTML = '<option value="">Loading...</option>';
+        // stateDropdown.disabled = true;
+        cityDropdown.innerHTML = '<option value="">Select City</option>';
+        cityDropdown.disabled = true;
+
+        fetch('https://countriesnow.space/api/v0.1/countries/states', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ country: selectedCountry })
+        })
+        .then(res => res.json())
+        .then(data => {
+        
+        stateDropdown.innerHTML = '<option value="">Select State</option>';
+        data.data.states.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state.name;
+                option.textContent = state.name;
+                stateDropdown.appendChild(option);
+            });
+            stateDropdown.disabled = false;
+        });
+    });
+
+    // State change → load cities
+    stateDropdown.addEventListener('change', function () {
+        const selectedCountry = countryDropdown.value;
+        const selectedState = this.value;
+        // cityDropdown.innerHTML = '<option value="">Loading...</option>';
+        // cityDropdown.disabled = true;
+
+        fetch('https://countriesnow.space/api/v0.1/countries/state/cities', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ country: selectedCountry, state: selectedState })
+        })
+        .then(res => res.json())
+        .then(data => {
+            cityDropdown.innerHTML = '<option value="">Select City</option>';
+            data.data.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                cityDropdown.appendChild(option);
+            });
+            cityDropdown.disabled = false;
+        });
+    });
+});
+</script> --}}
+
+
+
+
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const ledgeropenModalBtn = document.getElementById('ledgeropenModalBtn');
+    const ledgermodalOverlay = document.getElementById('ledgermodalOverlay');
+    const ledgercloseModalBtn = document.getElementById('ledgercloseModalBtn');
+    const ledgercancelBtn = document.getElementById('ledgercancelBtn');
+    const form = document.getElementById('create-ledger-form');
+
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const spinner = document.getElementById('spinner');
+
+    // Open/Close modal
+    function openModal() {
+        ledgermodalOverlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        ledgermodalOverlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        resetForm();
+    }
+
+    function resetForm() {
+        form.reset();
+        imagePreview.src = '';
+        imagePreview.style.display = 'none';
+        imagePlaceholder.style.display = 'block';
+        removeImageBtn.style.display = 'none';
+        
+        // Clear all error messages
+        document.querySelectorAll('[id^="error_"]').forEach(el => {
+            el.textContent = '';
+        });
+    }
+
+    ledgeropenModalBtn.addEventListener('click', openModal);
+    ledgercloseModalBtn.addEventListener('click', closeModal);
+    ledgercancelBtn.addEventListener('click', closeModal);
+  
+    // Generate random barcode
+    generateBarcodeBtn.addEventListener('click', function () {
+        const randomBarcode = 'BC' + Math.floor(100000000 + Math.random() * 900000000);
+        barcodeInput.value = randomBarcode;
+    });
+
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        // Clear previous errors
+        document.querySelectorAll('[id^="error_"]').forEach(el => {
+            el.textContent = '';
+        });
+        
+        // Show loading state
+        submitText.textContent = 'Saving...';
+        spinner.classList.remove('hidden');
+        submitBtn.disabled = true;
+        
+        // Prepare form data
+        const formData = new FormData(form);
+        
+        // Submit via fetch API
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                
+
+                
+            // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        }
+        })
+        .then(response => {
+    if (!response.ok) {
+        return response.json().then(err => { throw err; });
+    }
+    return response.json();
+})
+
+        .then(data => {
+           
+            resetForm();
+            closeModal();
+            alert('Item added successfully!');
+            
+        })
+        .catch(error => {
+            if (error.errors) {
+                Object.entries(error.errors).forEach(([field, messages]) => {
+                    const errorElement = document.getElementById(`error_${field}`);
+                    if (errorElement) {
+                        errorElement.textContent = messages.join(' ');
+                    }
+                });
+            } else {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        })
+        .finally(() => {
+            // Reset button state
+            submitText.textContent = 'Save Item';
+            spinner.classList.add('hidden');
+            submitBtn.disabled = false;
+        });
+    });
+
+   ledgermodalOverlay.addEventListener('click', function (e) {
+        if (e.target === ledgermodalOverlay) {
+            closeModal();
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const countryDropdown = document.getElementById('country');
+    const stateDropdown = document.getElementById('state');
+    const cityDropdown = document.getElementById('city');
+
+    const defaultCountry = 'India';
+   const defaultstate = 'Tamil Nadu'; 
+
+
+
+    fetch('https://countriesnow.space/api/v0.1/countries/positions')
+        .then(res => res.json())
+        .then(data => {
+            data.data.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.name;
+                option.textContent = country.name;
+                if (country.name === defaultCountry) {
+                    option.selected = true;
+                }
+                countryDropdown.appendChild(option);
+            });
+
+            const event = new Event('change');
+            countryDropdown.dispatchEvent(event);
+        });
+
+    // Country change → load states
+    countryDropdown.addEventListener('change', function () {
+        const selectedCountry = this.value;
+        // stateDropdown.innerHTML = '<option value="">Loading...</option>';
+        // stateDropdown.disabled = true;
+        cityDropdown.innerHTML = '<option value="">Select City</option>';
+        cityDropdown.disabled = true;
+
+        fetch('https://countriesnow.space/api/v0.1/countries/states', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ country: selectedCountry })
+        })
+        .then(res => res.json())
+        .then(data => {
+        
+        stateDropdown.innerHTML = '<option value="">Select State</option>';
+        data.data.states.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state.name;
+                option.textContent = state.name;
+                stateDropdown.appendChild(option);
+            });
+            stateDropdown.disabled = false;
+        });
+    });
+
+    // State change → load cities
+    stateDropdown.addEventListener('change', function () {
+        const selectedCountry = countryDropdown.value;
+        const selectedState = this.value;
+        // cityDropdown.innerHTML = '<option value="">Loading...</option>';
+        // cityDropdown.disabled = true;
+
+        fetch('https://countriesnow.space/api/v0.1/countries/state/cities', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ country: selectedCountry, state: selectedState })
+        })
+        .then(res => res.json())
+        .then(data => {
+            cityDropdown.innerHTML = '<option value="">Select City</option>';
+            data.data.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                cityDropdown.appendChild(option);
+            });
+            cityDropdown.disabled = false;
+        });
+    });
+});
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.getElementById("ledgerSearchInput");
+        const suggestions = document.getElementById("ledgerSuggestions");
+
+        input.addEventListener("input", function () {
+            const query = this.value;
+
+            if (query.length < 2) {
+                suggestions.innerHTML = '';
+                suggestions.classList.add("hidden");
+                return;
+            }
+
+            fetch(`/search?q=${encodeURIComponent(query)}&type=ledger`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestions.innerHTML = '';
+                    if (data.length > 0) {
+                       data.forEach(item => {
+    const li = document.createElement("li");
+    li.innerHTML = `<strong>${item.name}</strong> - <em>${item.type}</em>`;
+    li.className = "px-4 py-2 hover:bg-blue-100 cursor-pointer";
+    li.addEventListener("click", function () {
+        window.location.href = `/ledgers/show/${item.id}`;
+    });
+    suggestions.appendChild(li);
+});
+
+                        suggestions.classList.remove("hidden");
+                    } else {
+                        suggestions.classList.add("hidden");
+                    }
+                });
+        });
+    });
+</script>
+
+
 @endsection

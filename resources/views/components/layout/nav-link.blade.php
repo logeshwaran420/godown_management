@@ -1,6 +1,6 @@
 @props([
     'href',
-    'active' => request()->url() === $href, // optional: exact match
+    'active' => request()->url() === $href,
 ])
 
 

@@ -1,330 +1,30 @@
-@extends('layouts.app')
+ <div id="modalOverlay" class="fixed inset-0 z-50 overflow-y-auto" style="display:none;">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div id="modalBg" class="fixed inset-0 transition-opacity ease-in-out duration-300" aria-hidden="true" style="background:rgba(17,24,39,0.75);"></div>
 
-@section('content')
-
-
-<div class="container mx-auto px-4 py-6">
- 
-
-    <button id="openModalBtn" type="button"
-            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150">
-        <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
-        Add New Item
-    </button>
-
-  
-</div>
-
-
-
-
-
-
-
- <x-ledger.edit-model 
- 
-    :ledger="$ledger"
-    />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    const openModalBtn = document.getElementById('openModalBtn');
-    const modalOverlay = document.getElementById('modalOverlay');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const form = document.getElementById('create-item-form');
-    const imageInput = document.getElementById('image');
-    const imagePreview = document.getElementById('imagePreview');
-    const imagePlaceholder = document.getElementById('imagePlaceholder');
-    const removeImageBtn = document.getElementById('removeImageBtn');
-    const generateBarcodeBtn = document.getElementById('generateBarcodeBtn');
-    const barcodeInput = document.getElementById('barcode');
-    const submitBtn = document.getElementById('submitBtn');
-    const submitText = document.getElementById('submitText');
-    const spinner = document.getElementById('spinner');
-
-    // Open/Close modal
-    function openModal() {
-        modalOverlay.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-        modalOverlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        resetForm();
-    }
-
-    function resetForm() {
-        form.reset();
-        imagePreview.src = '';
-        imagePreview.style.display = 'none';
-        imagePlaceholder.style.display = 'block';
-        removeImageBtn.style.display = 'none';
-        
-        // Clear all error messages
-        document.querySelectorAll('[id^="error_"]').forEach(el => {
-            el.textContent = '';
-        });
-    }
-
-    openModalBtn.addEventListener('click', openModal);
-    closeModalBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
-  
-    // Generate random barcode
-    generateBarcodeBtn.addEventListener('click', function () {
-        const randomBarcode = 'BC' + Math.floor(100000000 + Math.random() * 900000000);
-        barcodeInput.value = randomBarcode;
-    });
-
-    // Image preview and validation
-    imageInput.addEventListener('change', function (event) {
-        const file = event.target.files[0];
-        const errorSpan = document.getElementById('error_image');
-
-        if (file) {
-            const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-            if (!validTypes.includes(file.type)) {
-                errorSpan.textContent = 'Only JPG, PNG or GIF images are allowed';
-                imageInput.value = '';
-                return;
-            }
-
-            if (file.size > 2 * 1024 * 1024) {
-                errorSpan.textContent = 'Image size must be less than 2MB';
-                imageInput.value = '';
-                return;
-            }
-
-            errorSpan.textContent = '';
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-                imagePlaceholder.style.display = 'none';
-                removeImageBtn.style.display = 'flex';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    removeImageBtn.addEventListener('click', function () {
-        imageInput.value = '';
-        imagePreview.src = '';
-        imagePreview.style.display = 'none';
-        imagePlaceholder.style.display = 'block';
-        removeImageBtn.style.display = 'none';
-        document.getElementById('error_image').textContent = '';
-    });
-
-    // Form submission
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        
-        // Clear previous errors
-        document.querySelectorAll('[id^="error_"]').forEach(el => {
-            el.textContent = '';
-        });
-        
-        // Show loading state
-        submitText.textContent = 'Saving...';
-        spinner.classList.remove('hidden');
-        submitBtn.disabled = true;
-        
-        // Prepare form data
-        const formData = new FormData(form);
-        
-        // Submit via fetch API
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
+            <div id="modalContent"
+                 class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                 
-
+                <!-- Header -->
+                <div class="bg-blue-600 px-4 py-3 sm:px-6 sm:flex sm:items-center sm:justify-between">
+                    <h3 class="text-lg leading-6 font-medium text-white">
+                        Edit Ledger 
+                    </h3>
+                    <button id="closeModalBtn" type="button" class="text-blue-100 hover:text-white focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
                 
-            // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-        }
-        })
-        .then(response => {
-    if (!response.ok) {
-        return response.json().then(err => { throw err; });
-    }
-    return response.json();
-})
-
-        .then(data => {
-           
-            resetForm();
-            closeModal();
-            alert('Item added successfully!');
-            
-        })
-        .catch(error => {
-            if (error.errors) {
-                Object.entries(error.errors).forEach(([field, messages]) => {
-                    const errorElement = document.getElementById(`error_${field}`);
-                    if (errorElement) {
-                        errorElement.textContent = messages.join(' ');
-                    }
-                });
-            } else {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            }
-        })
-        .finally(() => {
-            // Reset button state
-            submitText.textContent = 'Save Item';
-            spinner.classList.add('hidden');
-            submitBtn.disabled = false;
-        });
-    });
-
-   modalOverlay.addEventListener('click', function (e) {
-        if (e.target === modalOverlay) {
-            closeModal();
-        }
-    });
-});
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const countryDropdown = document.getElementById('country');
-    const stateDropdown = document.getElementById('state');
-    const cityDropdown = document.getElementById('city');
-
-    const currentCountry = "{{ old('country', $ledger->country) }}";
-    const currentState = "{{ old('state', $ledger->state) }}";
-    const currentCity = "{{ old('city', $ledger->city) }}";
-
-    fetch('https://countriesnow.space/api/v0.1/countries/positions')
-        .then(res => res.json())
-        .then(data => {
-            data.data.forEach(country => {
-                const option = document.createElement('option');
-                option.value = country.name;
-                option.textContent = country.name;
-                if (country.name === currentCountry) {
-                    option.selected = true;
-                }
-                countryDropdown.appendChild(option);
-            });
-
-            if (currentCountry) {
-                const event = new Event('change');
-                countryDropdown.dispatchEvent(event);
-            }
-        });
-
-    
-    countryDropdown.addEventListener('change', function () {
-        const selectedCountry = this.value;
-        cityDropdown.innerHTML = '<option value="">Select City</option>';
-        cityDropdown.disabled = true;
-
-        fetch('https://countriesnow.space/api/v0.1/countries/states', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ country: selectedCountry })
-        })
-        .then(res => res.json())
-        .then(data => {
-            stateDropdown.innerHTML = '<option value="">Select State</option>';
-            data.data.states.forEach(state => {
-                const option = document.createElement('option');
-                option.value = state.name;
-                option.textContent = state.name;
-                if (state.name === currentState) {
-                    option.selected = true;
-                }
-                stateDropdown.appendChild(option);
-            });
-            stateDropdown.disabled = false;
-            
-            
-            if (currentState) {
-                const event = new Event('change');
-                stateDropdown.dispatchEvent(event);
-            }
-        });
-    });
-
-
-    stateDropdown.addEventListener('change', function () {
-        const selectedCountry = countryDropdown.value;
-        const selectedState = this.value;
-
-        fetch('https://countriesnow.space/api/v0.1/countries/state/cities', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ country: selectedCountry, state: selectedState })
-        })
-        .then(res => res.json())
-        .then(data => {
-            cityDropdown.innerHTML = '<option value="">Select City</option>';
-            data.data.forEach(city => {
-                const option = document.createElement('option');
-                option.value = city;
-                option.textContent = city;
-                if (city === currentCity) {
-                    option.selected = true;
-                }
-                cityDropdown.appendChild(option);
-            });
-            cityDropdown.disabled = false;
-        });
-    });
-});
-</script>
-
-
-
-
-{{-- <div class="container mx-auto px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Edit Ledger</h1>
-        <a href="{{ route('ledgers') }}" 
-           class="inline-flex items-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Ledgers
-        </a>
-    </div>
-    <div class="bg-white shadow rounded-xl overflow-hidden">
-        <form action="{{ route('ledgers.update', $ledger->id) }}" method="POST" class="p-6 space-y-6">
+                <!-- Form Content -->
+                <div class="bg-white">
+                 <form action="{{ route('ledgers.update', $ledger) }}" method="POST" class="p-6 space-y-6">
             @csrf
             @method('PUT')
 
-            <!-- Form grid with improved spacing and focus states -->
-            <div class="space-y-6">
+                <!-- Form grid with improved spacing and focus states -->
+                 <div class="space-y-6">
                 <!-- Name Field -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="md:col-span-1">
@@ -512,25 +212,25 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 </div>
             </div>
-
-            <!-- Form actions with improved buttons -->
-            <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <a href="#" 
-                   class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:outline-none focus:ring-gray-300 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:focus:ring-gray-700 transition-colors duration-200 flex items-center shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                    </svg>
-                    Cancel
-                </a>
-                <button type="submit" 
-                        class="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:ring-2 focus:outline-none focus:ring-blue-300 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 transition-colors duration-200 flex items-center shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    Update Ledger
-                </button>
+                <!-- Form actions with improved buttons -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <button type="button" onclick="closeLedgerModal()"
+                           class="px-5 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:outline-none focus:ring-gray-300 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 dark:focus:ring-gray-700 transition-colors duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-5 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-colors duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        Update Ledger
+                    </button>
+                </div>
+            </form>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
-</div> --}}
-@endsection

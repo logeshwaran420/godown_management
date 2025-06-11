@@ -26,17 +26,14 @@
                         </div>
                     </div>
                 </div>
-
-                <input 
-                    type="text" 
-                    id="simple-search"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-48 pl-12 pr-3 py-2.5 group-hover:w-72 focus:w-72 transition-all duration-300" 
-                    placeholder="Search Ledger (/)..."
-                    autocomplete="off"
-                />
-
-                <!-- Only this container should be scrollable -->
-                <div id="search-results" class="absolute left-0 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg z-10 max-h-60 overflow-auto hidden"></div>
+<input 
+    type="text" 
+    id="simple-search"
+    class="bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-80 pl-12 pr-4 py-3 group-hover:w-[28rem] focus:w-[28rem] transition-all duration-300" 
+    placeholder="Search Ledger (/)..."
+    autocomplete="off"
+/>
+      <div id="search-results" class="absolute left-0 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg z-10 max-h-60 overflow-auto hidden"></div>
             </div>
         </form>
     </div>
@@ -93,7 +90,7 @@
 
         const ul = document.createElement('ul');
         ul.className = 'text-sm text-gray-700';
-
+        
         results.forEach((result, index) => {
             const li = document.createElement('li');
             const a = document.createElement('a');
