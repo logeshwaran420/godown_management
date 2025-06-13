@@ -6,7 +6,8 @@
                  class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                 
                 <!-- Header -->
-                <div class="bg-blue-600 px-4 py-3 sm:px-6 sm:flex sm:items-center sm:justify-between">
+              <div class="bg-blue-600 px-4 py-3 sm:px-6">
+    <div class="flex items-center justify-between">
                     <h3 class="text-lg leading-6 font-medium text-white">
                         Edit Ledger 
                     </h3>
@@ -16,6 +17,7 @@
                         </svg>
                     </button>
                 </div>
+              </div>
                 
                 <!-- Form Content -->
                 <div class="bg-white">

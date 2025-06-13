@@ -12,14 +12,30 @@ use Illuminate\Http\Request;
 
 class MovementController extends Controller
 {
-    public function index(){
+//     public function index(){
 
-$movements = Movement::latest('date')
-                      ->paginate(7);
-return view("movement.index",compact('movements'));
-    }
+// $movements = Movement::latest('date')
+//                       ->paginate(7);
+// return view("movement.index",compact('movements'));
+//     }
     
-    public function create(){
+    public function index(Request $request)
+{
+    $perPage = $request->input('per_page', 5); 
+    $movements = Movement::latest('date')
+                         ->paginate($perPage)
+                         ->withQueryString(); 
+
+  
+    return view("movement.index", array_merge([
+        'movements' => $movements,
+        'perPage' => $perPage,
+    ]));
+}
+
+
+
+public function create(){
 
         $warehouseId = session('warehouse_id'); 
     $from_warehouse = Warehouse::find($warehouseId);

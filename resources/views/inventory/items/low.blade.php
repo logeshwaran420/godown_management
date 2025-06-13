@@ -45,78 +45,74 @@
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white">Low Stock Items</h3>
             </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Current Stock</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
-<th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-    Action
-</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach ($inventories as $inventory)
-                          @php
-                        $item = $inventory->item;
-                    @endphp
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 rounded-md overflow-hidden bg-gray-200">
-                                        @if($item->image)
-                                            <img src="{{ asset('storage/' . $item->image) }}" alt="Product" class="h-full w-full object-cover">
-                                        @else
-                                            <svg class="h-full w-full text-gray-400 p-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
-                                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                                            </svg>
-                                        @endif
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $item->name }}</div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $item->category->name ?? 'Uncategorized' }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600 dark:text-red-400">
-                                {{ $item->current_stock }} {{ $item->unit->name }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                         {{ $item->price ? '₹' . number_format($item->price, 2) : 'N/A' }}
-                            </td>
-<td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-    <div class="flex justify-center space-x-2">
-        <!-- Inward Button -->
-        <a href="{{ route('inwards.create', ['item' => $item]) }}" 
-           class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Inward
-        </a>
-        
-        <!-- Details Button -->
-        <a href="{{ route('inventory.items.show', $inventory) }}" 
-           class="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded shadow-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Details
-        </a>
-    </div>
-</td>
-
-
-
-
+        <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+                <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
+                <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock</th>
+                <th scope="col" class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
+                <th scope="col" class="px-4 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Action
+                </th>
+            </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            @foreach ($inventories as $inventory)
+              @php
+                $item = $inventory->item;
+              @endphp
+            <tr>
+                <td class="px-4 sm:px-6 py-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-md overflow-hidden bg-gray-200">
+                            @if($item->image)
+                                <img src="{{ asset('storage/' . $item->image) }}" alt="Product" class="h-full w-full object-cover">
+                            @else
+                                <svg class="h-full w-full text-gray-400 p-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                                </svg>
+                            @endif
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[150px]">{{ $item->name }}</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $item->category->name ?? 'Uncategorized' }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-4 sm:px-6 py-4 text-sm font-medium text-red-600 dark:text-red-400">
+                    {{ $item->current_stock }} {{ $item->unit->name }}
+                </td>
+                <td class="px-4 sm:px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                    {{ $item->price ? '₹' . number_format($item->price, 2) : 'N/A' }}
+                </td>
+                <td class="px-4 sm:px-6 py-4 text-center text-sm font-medium">
+                    <div class="flex justify-center space-x-1 sm:space-x-2">
+                        <!-- Inward Button -->
+                        <a href="{{ route('inwards.create', ['item' => $item]) }}" 
+                           class="inline-flex items-center px-2 sm:px-3 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-0 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span class="hidden sm:inline">Inward</span>
+                        </a>
                         
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        <!-- Details Button -->
+                        <a href="{{ route('inventory.items.show', $inventory) }}" 
+                           class="inline-flex items-center px-2 sm:px-3 py-1 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded shadow-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-0 sm:mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="hidden sm:inline">Details</span>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
 
 
 

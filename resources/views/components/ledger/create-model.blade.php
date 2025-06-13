@@ -7,16 +7,18 @@
                  class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                 
                 <!-- Header -->
-                <div class="bg-blue-600 px-4 py-3 sm:px-6 sm:flex sm:items-center sm:justify-between">
-                    <h3 class="text-lg leading-6 font-medium text-white">
-                         Create New Ledger
-                    </h3>
-                    <button id="ledgercloseModalBtn" type="button" class="text-blue-100 hover:text-white focus:outline-none">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
+               <div class="bg-blue-600 px-4 py-3 sm:px-6">
+    <div class="flex items-center justify-between">
+        <h3 class="text-lg leading-6 font-medium text-white">
+            Create New Ledger
+        </h3>
+        <button id="ledgercloseModalBtn" type="button" class="text-blue-100 hover:text-white focus:outline-none">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+</div>
                 
                 <!-- Form Content -->
                 <div class="bg-white">

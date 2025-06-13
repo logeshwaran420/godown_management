@@ -3,37 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'Inventory Dashboard')</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Alpine.js -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
-    <!-- Livewire Styles -->
-    @livewireStyles
-
-    <!-- Vite Assets -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+   <script src="https://cdn.tailwindcss.com"></script>
+ <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+ @livewireStyles
+ @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @stack('styles')
 </head>
 <body class="bg-white font-sans text-gray-800">
-
     <div class="flex h-screen overflow-hidden" role="main">
-        <!-- Sidebar -->
         <x-layout.slidebar aria-label="Sidebar Navigation" />
-
-        <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-y-auto" role="main">
             @yield('content')
         </main>
     </div>
-
-    <!-- Livewire Scripts -->
     @livewireScripts
-
-    <!-- Custom Alpine.js for Search Bar -->
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('searchBar', () => ({
@@ -61,7 +45,6 @@
             }));
         });
     </script>
-
-    @stack('scripts')
+@stack('scripts')
 </body>
 </html>

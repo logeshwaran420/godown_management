@@ -21,6 +21,7 @@ class ItemController extends Controller
 
     public function store(Request $request)
     {
+       
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
@@ -77,10 +78,8 @@ class ItemController extends Controller
 
     public function update(Request $request, Item $item)
     {
-        
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'barcode' => 'required|string|max:255|unique:items,barcode,' . $item->id,
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',
             'price' => 'required|numeric|min:0',
@@ -89,6 +88,7 @@ class ItemController extends Controller
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
         ]);
+     
 
         if ($request->hasFile('image')) {
             if ($item->image && file_exists(public_path('storage/' . $item->image))) {
@@ -134,23 +134,8 @@ $inventories = Inventory::where('warehouse_id', $warehouseId)
     ], $commonData));
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public function destroy(item $item){
-        $item->delete();
-
-        return redirect()->route('inventory.items');
+public function destroy(item $item){   
+    $item->delete();
+            return redirect()->route('inventory.items');
     }
 }

@@ -144,7 +144,7 @@
 <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-amber-500 hover:shadow-md transition group">
     <div class="flex items-center justify-between">
         <div>
-            <p class="text-sm font-medium text-gray-500">Items Movement</p>
+            <p class="text-sm font-medium text-gray-500">Item Outwards</p>
             <div class="flex items-end space-x-2">
                 <p class="text-2xl font-semibold text-gray-800 mt-1">
                   
@@ -256,18 +256,13 @@
         $route = route('outwards.show', $activity);
     } 
 @endphp
+       <tr class="hover:bg-gray-50 transition cursor-pointer"               
+       onclick="window.location='{{ $route }}'">
 
-
-
-
-                            <tr class="hover:bg-gray-50 transition cursor-pointer"               
-                            onclick="window.location='{{ $route }}'"                           
-                            
-                            >
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ \Carbon\Carbon::parse($activity->created_at)->format('M d, Y') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {{ \Carbon\Carbon::parse($activity->created_at)->format('M d, Y') }}
+                        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                         {{ $activity->type === 'inward' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
                                         {{ ucfirst($activity->type) }}
@@ -342,11 +337,10 @@
 
 
 <div class="space-y-6">
-            <!-- Quick Actions -->
         <div class="bg-white p-6 rounded-lg shadow-sm">
     <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
     <div class="grid grid-cols-2 gap-3">
-        <!-- Item -->
+        
     <button id="openItem"  class="flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 transition bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
     <div class="bg-blue-100 p-3 rounded-full mb-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -482,210 +476,186 @@
      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
-{{--    
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <div class="flex space-x-4 mb-4">
-                <button id="dayBtn" class="px-4 py-2 bg-blue-100 text-blue-800 rounded-md">Day</button>
-                <button id="monthBtn" class="px-4 py-2 bg-gray-100 text-gray-800 rounded-md">Month</button>
-                <button id="allBtn" class="px-4 py-2 bg-gray-100 text-gray-800 rounded-md">All</button>
-            </div>
-            
-            <div class="relative h-96">
-                <canvas id="inventoryChart"></canvas>
-            </div>
-    </div> --}}
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Initialize chart with empty data first
-        const ctx = document.getElementById('inventoryChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: { labels: [], datasets: [] },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { 
-                        position: 'top',
-                        labels: {
-                            boxWidth: 12,
-                            padding: 20
-                        }
-                    },
-                    title: { 
-                        display: true, 
-                        text: 'Loading data...',
-                        font: { size: 16 }
-                    },
-                    tooltip: { 
-                        mode: 'index', 
-                        intersect: false,
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                        bodyFont: { size: 14 },
-                        titleFont: { size: 16 }
-                    }
+ <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('inventoryChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [] },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { boxWidth: 12, padding: 20 }
                 },
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        title: { 
-                            display: true, 
-                            text: 'Quantity',
-                            font: { weight: 'bold' }
-                        },
-                        grid: {
-                            drawBorder: false,
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    },
-                    x: { 
-                        title: { 
-                            display: true, 
-                            text: 'Time Period',
-                            font: { weight: 'bold' }
-                        },
-                        grid: { display: false }
-                    }
+                title: {
+                    display: true,
+                    text: 'Loading data...',
+                    font: { size: 16 }
                 },
-                elements: {
-                    point: {
-                        radius: 4,
-                        hoverRadius: 6
-                    }
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    bodyFont: { size: 14 },
+                    titleFont: { size: 16 }
                 }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantity',
+                        font: { weight: 'bold' }
+                    },
+                    grid: { drawBorder: false, color: 'rgba(0, 0, 0, 0.05)' }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time Period',
+                        font: { weight: 'bold' }
+                    },
+                    grid: { display: false }
+                }
+            },
+            elements: {
+                point: { radius: 4, hoverRadius: 6 }
             }
-        });
+        }
+    });
 
-        // Fetch data from server
-        fetch("{{ route('graph') }}")
-            .then(res => res.json())
-            .then(serverData => {
-                // Process server data into chart format
-                const chartData = {
-                    day: {
-                        labels: serverData.day_labels,
-                        datasets: [
-                            {
-                                label: 'Inward Stock',
-                                data: serverData.inwards_day,
-                                backgroundColor: 'rgba(74, 222, 128, 0.2)',
-                                borderColor: 'rgba(74, 222, 128, 1)',
-                                borderWidth: 2,
-                                tension: 0.3,
-                                fill: true
-                            },
-                            {
-                                label: 'Outward Stock',
-                                data: serverData.outwards_day,
-                                backgroundColor: 'rgba(248, 113, 113, 0.2)',
-                                borderColor: 'rgba(248, 113, 113, 1)',
-                                borderWidth: 2,
-                                tension: 0.3,
-                                fill: true
-                            }
-                        ]
-                    },
-                    month: {
-                        labels: serverData.month_labels,
-                        datasets: [
-                            {
-                                label: 'Inward Stock',
-                                data: serverData.inwards_month,
-                                backgroundColor: 'rgba(74, 222, 128, 0.2)',
-                                borderColor: 'rgba(74, 222, 128, 1)',
-                                borderWidth: 2,
-                                tension: 0.3,
-                                fill: true
-                            },
-                            {
-                                label: 'Outward Stock',
-                                data: serverData.outwards_month,
-                                backgroundColor: 'rgba(248, 113, 113, 0.2)',
-                                borderColor: 'rgba(248, 113, 113, 1)',
-                                borderWidth: 2,
-                                tension: 0.3,
-                                fill: true
-                            }
-                        ]
-                    },
-                    all: {
-                        labels: serverData.all_labels,
-                        datasets: [
-                            {
-                                label: 'Inward Stock',
-                                data: serverData.inwards_all,
-                                backgroundColor: 'rgba(74, 222, 128, 0.2)',
-                                borderColor: 'rgba(74, 222, 128, 1)',
-                                borderWidth: 2,
-                                tension: 0.3,
-                                fill: true
-                            },
-                            {
-                                label: 'Outward Stock',
-                                data: serverData.outwards_all,
-                                backgroundColor: 'rgba(248, 113, 113, 0.2)',
-                                borderColor: 'rgba(248, 113, 113, 1)',
-                                borderWidth: 2,
-                                tension: 0.3,
-                                fill: true
-                            }
-                        ]
-                    }
-                };
+    fetch("{{ route('graph') }}")
+        .then(res => res.json())
+        .then(serverData => {
+            const chartData = {
+                day: {
+                    labels: serverData.day_labels,
+                    datasets: [
+                        {
+                            label: 'Inward Stock',
+                            data: serverData.inwards_day,
+                            backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                            borderColor: 'rgba(74, 222, 128, 1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Outward Stock',
+                            data: serverData.outwards_day,
+                            backgroundColor: 'rgba(248, 113, 113, 0.2)',
+                            borderColor: 'rgba(248, 113, 113, 1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                month: {
+                    labels: serverData.weekLabels,
+                    datasets: [
+                        {
+                            label: 'Inward Stock',
+                            data: serverData.inwardsWeek,
+                            backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                            borderColor: 'rgba(74, 222, 128, 1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Outward Stock',
+                            data: serverData.outwardsWeek,
+                            backgroundColor: 'rgba(248, 113, 113, 0.2)',
+                            borderColor: 'rgba(248, 113, 113, 1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                all: {
+                    labels: serverData.all_labels,
+                    datasets: [
+                        {
+                            label: 'Inward Stock',
+                            data: serverData.inwards_all,
+                            backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                            borderColor: 'rgba(74, 222, 128, 1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Outward Stock',
+                            data: serverData.outwards_all,
+                            backgroundColor: 'rgba(248, 113, 113, 0.2)',
+                            borderColor: 'rgba(248, 113, 113, 1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                }
+            };
 
-                // Set initial view
+            // Initial chart setup
+            chart.data = chartData.day;
+            chart.options.plugins.title.text = 'Daily Stock Movement';
+            chart.update();
+            updateActiveButton('dayBtn');
+
+            // Event Listeners
+            document.getElementById('dayBtn').addEventListener('click', () => {
                 chart.data = chartData.day;
                 chart.options.plugins.title.text = 'Daily Stock Movement';
                 chart.update();
                 updateActiveButton('dayBtn');
+            });
 
-                // Button event handlers
-                document.getElementById('dayBtn').addEventListener('click', () => {
-                    chart.data = chartData.day;
-                    chart.options.plugins.title.text = 'Daily Stock Movement';
-                    chart.update();
-                    updateActiveButton('dayBtn');
-                });
-
-                document.getElementById('monthBtn').addEventListener('click', () => {
-                    chart.data = chartData.month;
-                    chart.options.plugins.title.text = 'Monthly Stock Movement';
-                    chart.update();
-                    updateActiveButton('monthBtn');
-                });
-
-                document.getElementById('allBtn').addEventListener('click', () => {
-                    chart.data = chartData.all;
-                    chart.options.plugins.title.text = 'Overall Stock Trend';
-                    chart.update();
-                    updateActiveButton('allBtn');
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-                chart.options.plugins.title.text = 'Error loading data';
+            document.getElementById('monthBtn').addEventListener('click', () => {
+                chart.data = chartData.month;
+                chart.options.plugins.title.text = 'Monthly Stock Movement';
                 chart.update();
+                updateActiveButton('monthBtn');
             });
 
-        // Update active button style
-        function updateActiveButton(activeId) {
-            const buttons = ['dayBtn', 'monthBtn', 'allBtn'];
-            buttons.forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    if (id === activeId) {
-                        btn.classList.remove('bg-gray-100', 'text-gray-800');
-                        btn.classList.add('bg-blue-100', 'text-blue-800');
-                    } else {
-                        btn.classList.remove('bg-blue-100', 'text-blue-800');
-                        btn.classList.add('bg-gray-100', 'text-gray-800');
-                    }
-                }
+            document.getElementById('allBtn').addEventListener('click', () => {
+                chart.data = chartData.all;
+                chart.options.plugins.title.text = 'Overall Stock Trend';
+                chart.update();
+                updateActiveButton('allBtn');
             });
-        }
-    });
-    </script>
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            chart.options.plugins.title.text = 'Error loading data';
+            chart.update();
+        });
+
+    function updateActiveButton(activeId) {
+        const buttons = ['dayBtn', 'monthBtn', 'allBtn'];
+        buttons.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                if (id === activeId) {
+                    btn.classList.remove('bg-gray-100', 'text-gray-800');
+                    btn.classList.add('bg-blue-100', 'text-blue-800');
+                } else {
+                    btn.classList.remove('bg-blue-100', 'text-blue-800');
+                    btn.classList.add('bg-gray-100', 'text-gray-800');
+                }
+            }
+        });
+    }
+});
+</script>
+
 
 
 

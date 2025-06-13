@@ -1,9 +1,8 @@
-<header class="bg-white shadow p-4 flex justify-between items-center">
-    <div class="flex items-center">
+<header class="bg-white shadow p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div class="w-full sm:w-auto">
         <form id="search-form" class="relative group transition-all duration-300" onsubmit="return false;">
             <label for="simple-search" class="sr-only">Search</label>
             <div class="relative" id="filter-container">
-
                 <div class="absolute inset-y-0 left-0 flex items-center pl-1">
                     <div class="relative">
                         <button 
@@ -26,20 +25,19 @@
                         </div>
                     </div>
                 </div>
-<input 
-    type="text" 
-    id="simple-search"
-    class="bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-80 pl-12 pr-4 py-3 group-hover:w-[28rem] focus:w-[28rem] transition-all duration-300" 
-    placeholder="Search Ledger (/)..."
-    autocomplete="off"
-/>
-      <div id="search-results" class="absolute left-0 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg z-10 max-h-60 overflow-auto hidden"></div>
+                <input 
+                    type="text" 
+                    id="simple-search"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full sm:w-80 pl-12 pr-4 py-3 group-hover:sm:w-[28rem] focus:sm:w-[28rem] transition-all duration-300" 
+                    placeholder="Search Ledger (/)..."
+                    autocomplete="off"
+                />
+                <div id="search-results" class="absolute left-0 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg z-10 max-h-60 overflow-auto hidden"></div>
             </div>
         </form>
     </div>
 
-    <!-- Avatar -->
-    <div class="flex items-center space-x-4 relative" id="avatar-container">
+    <div class="flex items-center space-x-4 relative self-end sm:self-auto" id="avatar-container">
         <img 
             id="avatar-button"
             class="inline w-8 h-8 rounded-full cursor-pointer" 
