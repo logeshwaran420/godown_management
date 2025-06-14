@@ -958,7 +958,7 @@ document.addEventListener('DOMContentLoaded', function () {
         imagePlaceholder.style.display = 'block';
         removeImageBtn.style.display = 'none';
         
-        // Clear all error messages
+     
         document.querySelectorAll('[id^="error_"]').forEach(el => {
             el.textContent = '';
         });
@@ -968,8 +968,7 @@ document.addEventListener('DOMContentLoaded', function () {
     ledgercloseModalBtn.addEventListener('click', closeModal);
     ledgercancelBtn.addEventListener('click', closeModal);
   
-    // Generate random barcode
-    generateBarcodeBtn.addEventListener('click', function () {
+     generateBarcodeBtn.addEventListener('click', function () {
         const randomBarcode = 'BC' + Math.floor(100000000 + Math.random() * 900000000);
         barcodeInput.value = randomBarcode;
     });
@@ -978,20 +977,16 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         
-        // Clear previous errors
         document.querySelectorAll('[id^="error_"]').forEach(el => {
             el.textContent = '';
         });
         
-        // Show loading state
         submitText.textContent = 'Saving...';
         spinner.classList.remove('hidden');
         submitBtn.disabled = true;
         
-        // Prepare form data
-        const formData = new FormData(form);
+         const formData = new FormData(form);
         
-        // Submit via fetch API
         fetch(form.action, {
             method: 'POST',
             body: formData,
@@ -1031,7 +1026,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })
         .finally(() => {
-            // Reset button state
             submitText.textContent = 'Save Item';
             spinner.classList.add('hidden');
             submitBtn.disabled = false;
@@ -1072,7 +1066,6 @@ document.addEventListener('DOMContentLoaded', function () {
             countryDropdown.dispatchEvent(event);
         });
 
-    // Country change → load states
     countryDropdown.addEventListener('change', function () {
         const selectedCountry = this.value;
         // stateDropdown.innerHTML = '<option value="">Loading...</option>';
@@ -1098,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', function () {
             stateDropdown.disabled = false;
         });
     });
-
+    
     // State change → load cities
     stateDropdown.addEventListener('change', function () {
         const selectedCountry = countryDropdown.value;

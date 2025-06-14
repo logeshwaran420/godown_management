@@ -82,7 +82,7 @@
                     </div>
                 </td>
                 <td class="px-4 sm:px-6 py-4 text-sm font-medium text-red-600 dark:text-red-400">
-                    {{ $item->current_stock }} {{ $item->unit->name }}
+                    {{ $inventory->current_stock }} {{ $item->unit->name }}
                 </td>
                 <td class="px-4 sm:px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                     {{ $item->price ? '₹' . number_format($item->price, 2) : 'N/A' }}

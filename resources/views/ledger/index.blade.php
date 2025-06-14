@@ -8,31 +8,7 @@
             <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Ledger Accounts</h1>
             <p class="text-sm text-gray-600 dark:text-gray-400">Manage your Ledgers accounts and contacts</p>
         </div>
-        {{-- <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-            <div class="relative w-full sm:w-64">
-                <input type="text" id="ledgerSearchInput" placeholder="Search ledgers..."
-                    class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
-                <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                    fill="currentColor">
-                    <path fill-rule="evenodd"
-                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                        clip-rule="evenodd" />
-                </svg>
-                <ul id="ledgerSuggestions"
-                    class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border rounded-md shadow-md max-h-60 overflow-y-auto hidden">
-                </ul>
-            </div>
-
-            <button type="button" id="ledgeropenModalBtn" 
-                    class="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors shadow-md hover:shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                </svg>
-                <span>New Ledger</span>
-            </button>
-        </div> --}}
-{{-- 
-        <div class="flex flex-row flex-wrap items-center gap-3 w-full"> --}}
+    
         
                     <div class="flex items-center gap-3">
     <div class="relative flex-1 min-w-[200px]">
@@ -58,6 +34,42 @@
     </button>
 </div>
     </div>
+     <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("ledgerSearchInput");
+    const suggestions = document.getElementById("ledgerSuggestions");
+
+    input.addEventListener("input", function () {
+        const query = this.value;
+
+        if (query.length < 2) {
+            suggestions.innerHTML = '';
+            suggestions.classList.add("hidden");
+            return;
+        }
+
+        fetch(`/search?q=${encodeURIComponent(query)}&type=ledger`)
+            .then(response => response.json())
+            .then(data => {
+                suggestions.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(item => {
+                        const li = document.createElement("li");
+                        li.innerHTML = `<h2>${item.name} <span class="text-gray-500">(${item.type})</span></h2>`;
+                        li.className = "px-3 sm:px-4 py-1 sm:py-2 hover:bg-blue-100 cursor-pointer text-sm sm:text-base";
+                        li.addEventListener("click", function () {
+                            window.location.href = `/ledgers/show/${item.id}`;
+                        });
+                        suggestions.appendChild(li);
+                    });
+                    suggestions.classList.remove("hidden");
+                } else {
+                    suggestions.classList.add("hidden");
+                }
+            });
+    });
+});
+</script>
 
      
 
